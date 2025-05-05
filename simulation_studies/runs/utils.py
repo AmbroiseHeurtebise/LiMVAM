@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import gennorm, pearsonr
 from picard import amari_distance
 import lingam
-from micado.micado import micado
+from limvam.micado import micado
 
 
 # function that samples data according to our model

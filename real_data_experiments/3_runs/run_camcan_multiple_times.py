@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 from pathlib import Path
 import os
-from micado.micado import micado
+from limvam.micado import micado
 
 
 # Limit the number of jobs

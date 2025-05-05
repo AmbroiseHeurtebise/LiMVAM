@@ -3,7 +3,7 @@ import pickle
 from time import time
 from pathlib import Path
 import os
-from micado.micado import micado
+from limvam.micado import micado
 
 
 # Limit the number of jobs

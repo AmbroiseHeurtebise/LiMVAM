@@ -1,6 +1,6 @@
-# Multiview ICA-based Causal Discovery
+# Linear Multi-View Acyclic Model
 
-This repository contains code to estimate a causal order and causal effect matrices from multiple datasets at once.
+This repository contains algorithms to estimate a causal order and causal effect matrices from multiple datasets at once.
 
 ## How to install
 

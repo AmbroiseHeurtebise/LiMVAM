@@ -3,9 +3,9 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "micado"
+name = "limvam"
 version = "0.0.1"
-description = "Multi-view ICA-based Causal Discovery"
+description = "Linear Multi-View Acyclic Model"
 readme = "README.md"
 authors = [
     { name = "Ambroise Heurtebise" }
@@ -22,4 +22,4 @@ dependencies = [
 ]
 
 [tool.setuptools]
-packages = ["micado"]
+packages = ["limvam"]

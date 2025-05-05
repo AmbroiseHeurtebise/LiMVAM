@@ -56,22 +56,46 @@ def compute_ratio_for_two_variables(x, y, steps=500, lr=1e-2):
     l1 = profile_log_likelihood(b_hat, x, y)
     l2 = profile_log_likelihood(b_hat_reverse, y, x)
     
-    return float(l1 - l2)
+    return float(l1 - l2), b_hat
 
 
-def estimate_causal_order(x, y, steps=500, lr=1e-2):
-    p = x.shape[1]
+def find_parent_variable(X, steps=500, lr=1e-2):
+    m, p_current, _ = X.shape
     
     # Compute log-ratios for each pair of variables
-    R = np.zeros((p, p))
-    indices = [(i, j) for i in range(p) for j in range(p) if i != j]
+    R = np.zeros((p_current, p_current))
+    B = np.zeros((m, p_current, p_current))
+    indices = [(i, j) for i in range(p_current) for j in range(p_current) if i != j]  # strictly upper triangular part
     for (i, j) in indices:
-        R[i, j] = compute_ratio_for_two_variables(x[:, i], y[:, j], steps=steps, lr=lr)
+        ratio, b_hat = compute_ratio_for_two_variables(X[:, i], X[:, j], steps=steps, lr=lr)
+        R[i, j] = ratio
+        B[:, i, j] = b_hat
     
     # Penalize negative scores
     scores = np.sum(np.minimum(0, R) ** 2, axis=1)
     
-    # Find causal order
-    order = np.argsort(scores)
+    # Find parent variable
+    parent = np.argmin(scores)
     
+    # Remove the effect of the parent variable
+    B_parent = B[:, parent][:, :, np.newaxis]  # shape (m, p, 1)
+    X_parent = X[:, parent][:, np.newaxis, :]  # shape (m, 1, n)
+    X -= B_parent * X_parent
+    
+    return parent, X
+
+
+def estimate_causal_order(X, steps=500, lr=1e-2):
+    p = X.shape[1]
+    X_current = X.copy()
+    
+    order = []
+    remaining_indices = np.arange(p)
+    while len(order) < p - 1:
+        parent, X_current = find_parent_variable(X_current, steps=steps, lr=lr)
+        X_current = np.delete(X_current, parent, axis=1)
+        order.append(remaining_indices[parent])
+        remaining_indices = np.delete(remaining_indices, parent)
+    order.append(remaining_indices[0])
+
     return order

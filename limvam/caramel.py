@@ -30,7 +30,7 @@ def mv_notears_penalty_shared_ordering(B):
 
 def mv_notears_penalty_multiple_orderings(B):
     _, n_components, _ = B.shape
-    return jnp.sum([jnp.trace(jax.scipy.linalg.expm(Bi * Bi)) - n_components for Bi in B])
+    return jnp.sum(jnp.array([jnp.trace(jax.scipy.linalg.expm(Bi * Bi)) - n_components for Bi in B]))
 
 
 def loss_function(B, X, lambda_pen=1., shared_causal_ordering=True):
@@ -80,7 +80,7 @@ def estimate_B(X, B_init, lambda_pen, shared_causal_ordering=True, use_callback=
     # optimization
     B_est, loss, _ = jaxmin_l_bfgs_b(
         value_and_grad_fn, B_init, history=history, X=X, lambda_pen=lambda_pen)
-    return B_est, loss, history
+    return B_est, history
 
 
 def caramel(
@@ -93,7 +93,7 @@ def caramel(
     
     # Estimate B with LBFGS
     B_init = jnp.zeros((n_views, n_components, n_components))
-    B, _, history = estimate_B(
+    B, history = estimate_B(
         X,
         B_init=B_init,
         lambda_pen=lambda_pen,

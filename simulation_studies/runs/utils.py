@@ -1,12 +1,13 @@
 import numpy as np
 from scipy.stats import gennorm, pearsonr
 from time import time
-import warnings
 from picard import amari_distance
 import lingam
 from limvam.micado import micado
 from limvam.praline import praline
 from limvam.caramel import caramel
+import warnings
+from sklearn.exceptions import ConvergenceWarning
 
 
 # function that samples data according to our model
@@ -138,9 +139,9 @@ def run_experiment(
     elif ica_algo == "multi_group_direct_lingam":
         start = time()
         # apply Multi Group DirectLiNGAM to retrieve B, T, P, and W
-        model = lingam.MultiGroupDirectLiNGAM()
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=FutureWarning)
+            model = lingam.MultiGroupDirectLiNGAM()
             model.fit(list(np.swapaxes(X, 1, 2)))
         execution_time = time() - start
         # causal order P
@@ -158,7 +159,10 @@ def run_experiment(
         P_estimates = []
         model = lingam.ICALiNGAM()
         for i in range(m):
-            model.fit(np.swapaxes(X[i], 0, 1))
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=FutureWarning)
+                warnings.simplefilter("ignore", category=ConvergenceWarning)
+                model.fit(np.swapaxes(X[i], 0, 1))
             # causal order P
             P_estimate = np.eye(p)[model.causal_order_]
             P_estimates.append(P_estimate)

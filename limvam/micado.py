@@ -81,12 +81,13 @@ def micado(
     
     # Step 1: use a multiview ICA algorithm
     if ica_algo == "shica_ml":
-        W, _, S_avg = shica_ml(X, max_iter=max_iter, tol=tol)
+        W, Sigma, S_avg = shica_ml(X, max_iter=max_iter, tol=tol)
     elif ica_algo == "shica_j":
-        W, _, S_avg = shica_j(X, max_iter=max_iter, tol=tol)
+        W, Sigma, S_avg = shica_j(X, max_iter=max_iter, tol=tol)
     elif ica_algo == "multiviewica":
         _, W, S_avg = multiviewica(
             X, max_iter=max_iter, tol=tol, random_state=random_state)
+        Sigma = np.zeros((m, p))
     else:
         raise ValueError(
             "ica_algo should be either 'shica_ml', 'shica_j', or 'multiviewica'")
@@ -97,8 +98,11 @@ def micado(
     QW = np.array([Wi[index] for Wi in W])
 
     # Step 3: scaling
-    D = np.array([np.diag(Wi) for Wi in QW])[:, :, np.newaxis]  # shape (m, p, 1)
-    DQW = QW / D
+    D = np.array([np.diag(Wi) for Wi in QW])                # shape (m, p)
+    DQW = QW / D[:, :, np.newaxis]
+    
+    if ica_algo in ["shica_ml", "shica_j"]:
+        Sigma = D**2 * Sigma
 
     # Step 4: causal effects
     B = np.array([np.eye(p)] * m) - DQW  # B is not lower triangular
@@ -122,4 +126,4 @@ def micado(
 
     if return_full:
         return B, T, P, S_avg, W
-    return B, T, P
+    return B, T, P, D, Sigma

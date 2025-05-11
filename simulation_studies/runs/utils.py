@@ -181,6 +181,8 @@ def run_experiment(
         start = time()
         B_estimates, T_estimates, P_estimate = praline(X, steps=1000, lr=1e-2)
         execution_time = time() - start
+        # reconstruct what would be unmixing matrices W
+        W_estimates = np.eye(p) - B_estimates
     elif ica_algo == "mv_notears":
         start = time()
         B_estimates, T_estimates, P_estimate, _ = caramel(
@@ -189,6 +191,8 @@ def run_experiment(
         execution_time = time() - start
         if not shared_causal_ordering:
             P_estimates = P_estimate
+        # reconstruct unmixing matrices W
+        W_estimates = np.eye(p) - B_estimates
     else:
         raise ValueError("Wrong ica_algo.")
     

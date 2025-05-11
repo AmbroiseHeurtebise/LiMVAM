@@ -23,7 +23,9 @@ nb_gaussian_disturbances_list = [0, 2, 4]
 nb_seeds = 2
 random_state_list = np.arange(nb_seeds)
 n_list = np.logspace(2, 4, 21, dtype=int)
-algo_list = ["multiviewica", "shica_j", "shica_ml", "multi_group_direct_lingam", "lingam"]
+algo_list = [
+    "multiviewica", "shica_j", "shica_ml", "multi_group_direct_lingam", "lingam",
+    "pairwise", "mv_notears"]
 
 # run experiment
 nb_expes = len(nb_gaussian_disturbances_list) * len(random_state_list) * len(n_list) * len(algo_list)
@@ -47,7 +49,7 @@ df = pd.DataFrame(dict_res)
 print(df)
 
 # save dataframe
-results_dir = "/storage/store2/work/aheurteb/MICaDo/simulation_studies/results/"
+results_dir = "/storage/store2/work/aheurteb/LiMVAM/simulation_studies/results/"
 if shared_causal_ordering:
     parent_dir = "results_timepoints_in_xaxis/shared_P/"
 else:

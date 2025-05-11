@@ -15,12 +15,12 @@ os.environ["NUMEXPR_NUM_THREADS"] = str(N_JOBS)
 # fixed parameters
 m = 5
 p = 4
-shared_causal_ordering = False
+shared_causal_ordering = True
 new_find_order_function = False
 
 # varying parameters
 nb_gaussian_disturbances_list = [0, 2, 4]
-nb_seeds = 50
+nb_seeds = 2
 random_state_list = np.arange(nb_seeds)
 n_list = np.logspace(2, 4, 21, dtype=int)
 algo_list = ["multiviewica", "shica_j", "shica_ml", "multi_group_direct_lingam", "lingam"]
@@ -52,7 +52,7 @@ if shared_causal_ordering:
     parent_dir = "results_timepoints_in_xaxis/shared_P/"
 else:
     parent_dir = "results_timepoints_in_xaxis/multiple_Pi/"
-save_name = f"DataFrame_with_{nb_seeds}_seeds_and_7_metrics"
+save_name = f"DataFrame_with_{nb_seeds}_seeds_and_time"
 save_path = results_dir + parent_dir + save_name
 df.to_csv(save_path, index=False)
 print("\n####################################### End #######################################")

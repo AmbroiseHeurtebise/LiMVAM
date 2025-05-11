@@ -1,5 +1,5 @@
 import pandas as pd
-import numpy as npf
+import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -36,7 +36,8 @@ estimator = "mean"
 labels = ['MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
 
 # read dataframe
-results_dir = "/storage/store2/work/aheurteb/MICaDo/simulation_studies/results/results_timepoints_in_xaxis/"
+results_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/results/results_timepoints_in_xaxis/"
+# results_dir = "/storage/store2/work/aheurteb/MICaDo/simulation_studies/results/results_timepoints_in_xaxis/"
 if shared_permutation:
     parent_dir = "shared_P"
 else:
@@ -117,7 +118,8 @@ fig.legend(
 )
 
 # save figure
-figures_dir = Path("/storage/store2/work/aheurteb/MICaDo/simulation_studies/figures")
+figures_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/figures")
+# figures_dir = Path("/storage/store2/work/aheurteb/MICaDo/simulation_studies/figures")
 figures_dir.mkdir(parents=True, exist_ok=True)
 plt.savefig(figures_dir / f"simulation_{parent_dir}.pdf", bbox_inches="tight")
 plt.show()

@@ -16,11 +16,10 @@ os.environ["NUMEXPR_NUM_THREADS"] = str(N_JOBS)
 m = 5
 p = 4
 shared_causal_ordering = True
-new_find_order_function = False
 
 # varying parameters
 nb_gaussian_disturbances_list = [0, 2, 4]
-nb_seeds = 2
+nb_seeds = 50
 random_state_list = np.arange(nb_seeds)
 n_list = np.logspace(2, 4, 21, dtype=int)
 algo_list = [
@@ -40,7 +39,6 @@ dict_res = Parallel(n_jobs=N_JOBS)(
         random_state=random_state,
         ica_algo=ica_algo,
         shared_causal_ordering=shared_causal_ordering,
-        new_find_order_function=new_find_order_function,
     ) for n, nb_gaussian_disturbances, random_state, ica_algo
     in product(n_list, nb_gaussian_disturbances_list, random_state_list, algo_list)
 )

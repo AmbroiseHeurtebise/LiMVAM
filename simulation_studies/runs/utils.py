@@ -103,7 +103,6 @@ def run_experiment(
     ica_algo="shica_ml",
     random_state=None,
     shared_causal_ordering=True,
-    new_find_order_function=False,
     use_scale_D=False,
 ):
     if density == "sub_gauss_super":
@@ -131,8 +130,7 @@ def run_experiment(
         # apply our main function to retrieve B, T, P, and W;
         B_estimates, T_estimates, P_estimate, _, W_estimates = micado(
             X, shared_causal_ordering=shared_causal_ordering, ica_algo=ica_algo,
-            random_state=random_state, new_find_order_function=new_find_order_function,
-            return_full=True)
+            random_state=random_state, return_full=True)
         execution_time = time() - start
         if not shared_causal_ordering:
             P_estimates = P_estimate  # shape (m, p, p)

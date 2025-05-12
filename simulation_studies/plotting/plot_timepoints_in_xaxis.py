@@ -108,8 +108,8 @@ legend_styles = [
     Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='--'),
     Line2D([0], [0], color=palette[3], linewidth=2.5, linestyle='--'),
     # Line2D([0], [0], color=palette[4], linewidth=2.5, linestyle='-'),
+    Line2D([0], [0], color=palette[4], linewidth=2.5, linestyle='-'),
     Line2D([0], [0], color=palette[5], linewidth=2.5, linestyle='-'),
-    Line2D([0], [0], color=palette[6], linewidth=2.5, linestyle='-'),
 ]
 # fig.legend(
 #     legend_styles, labels, bbox_to_anchor=(0.5, 1.05), loc="center",

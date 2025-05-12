@@ -4,7 +4,7 @@ import jax.numpy as jnp
 from jax import flatten_util
 from scipy.optimize import fmin_l_bfgs_b
 from functools import partial
-from .utils import _estimate_causal_order
+from .utils import _estimate_causal_order, find_order
 
 
 class OptimHistory:
@@ -105,12 +105,20 @@ def caramel(
     if shared_causal_ordering:
         B_avg = np.mean(np.abs(B), axis=0)
         order = _estimate_causal_order(B_avg)
+        if order is None:
+            # backup solution when B_avg cannot be permuted to strictly lower triangular
+            print("The order was not found. Using backup function.")
+            order = find_order(B_avg)
         P = np.eye(n_components)[order]
         T = P @ B @ P.T
     else:
         P = np.zeros((n_views, n_components, n_components))
         for i in range(n_views):
             order = _estimate_causal_order(np.abs(B[i]))
+            if order is None:
+                # backup solution when B cannot be permuted to strictly lower triangular
+                print("The order was not found. Using backup function.")
+                order = find_order(np.abs(B[i]))
             P[i] = np.eye(n_components)[order]
         T = np.array([Pi @ Bi @ Pi.T for Pi, Bi in zip(P, B)])
     

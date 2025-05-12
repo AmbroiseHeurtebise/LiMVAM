@@ -16,7 +16,6 @@ def micado(
     max_iter=3000,
     tol=1e-8,
     random_state=None,
-    new_find_order_function=False,
     return_full=False,
 ):
     """
@@ -108,19 +107,23 @@ def micado(
     B = np.array([np.eye(p)] * m) - DQW  # B is not lower triangular
 
     # Step 5: estimate causal order(s) with a simple method
-    if new_find_order_function:
-        find_permutation = find_order
-    else:
-        find_permutation = _estimate_causal_order
     if shared_causal_ordering:
         B_avg = np.mean(np.abs(B), axis=0)
-        order = find_permutation(B_avg)
+        order = _estimate_causal_order(B_avg)
+        if order is None:
+            # backup solution when B_avg cannot be permuted to strictly lower triangular
+            print("The order was not found. Using backup function.")
+            order = find_order(B_avg)
         P = np.eye(p)[order]
         T = P @ B @ P.T
     else:
         P = np.zeros((m, p, p))
         for i in range(m):
-            order = find_permutation(np.abs(B[i]))
+            order = _estimate_causal_order(np.abs(B[i]))
+            if order is None:
+                # backup solution when B cannot be permuted to strictly lower triangular
+                print("The order was not found. Using backup function.")
+                order = find_order(np.abs(B[i]))
             P[i] = np.eye(p)[order]
         T = np.array([Pi @ Bi @ Pi.T for Pi, Bi in zip(P, B)])
 

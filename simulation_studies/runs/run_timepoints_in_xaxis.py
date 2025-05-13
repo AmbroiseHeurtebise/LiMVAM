@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
+from time import time
 from itertools import product
 from joblib import Parallel, delayed
 from utils import run_experiment
@@ -16,6 +17,7 @@ os.environ["NUMEXPR_NUM_THREADS"] = str(N_JOBS)
 m = 5
 p = 4
 shared_causal_ordering = True
+use_scale_D = True
 
 # varying parameters
 nb_gaussian_disturbances_list = [0, 2, 4]
@@ -30,6 +32,7 @@ algo_list = [
 nb_expes = len(nb_gaussian_disturbances_list) * len(random_state_list) * len(n_list) * len(algo_list)
 print(f"\nTotal number of experiments : {nb_expes}")
 print("\n###################################### Start ######################################")
+start = time()
 dict_res = Parallel(n_jobs=N_JOBS)(
     delayed(run_experiment)(
         m=m,
@@ -39,12 +42,15 @@ dict_res = Parallel(n_jobs=N_JOBS)(
         random_state=random_state,
         ica_algo=ica_algo,
         shared_causal_ordering=shared_causal_ordering,
+        use_scale_D=use_scale_D,
     ) for n, nb_gaussian_disturbances, random_state, ica_algo
     in product(n_list, nb_gaussian_disturbances_list, random_state_list, algo_list)
 )
 print("\n################################ Obtained DataFrame ################################")
 df = pd.DataFrame(dict_res)
 print(df)
+execution_time = time() - start
+print(f"The experiment took {execution_time:.2f} s.")
 
 # save dataframe
 results_dir = "/storage/store2/work/aheurteb/LiMVAM/simulation_studies/results/"
@@ -52,7 +58,7 @@ if shared_causal_ordering:
     parent_dir = "results_timepoints_in_xaxis/shared_P/"
 else:
     parent_dir = "results_timepoints_in_xaxis/multiple_Pi/"
-save_name = f"DataFrame_with_{nb_seeds}_seeds_and_time"
+save_name = f"DataFrame_with_{nb_seeds}_seeds_time_and_scale"
 save_path = results_dir + parent_dir + save_name
 df.to_csv(save_path, index=False)
 print("\n####################################### End #######################################")

@@ -19,6 +19,7 @@ noise_level = 1.
 density = "sub_gauss_super"
 beta1 = 1.5
 beta2 = 2.5
+use_scale_D = True
 
 # varying parameters
 m_list = [3, 5, 8, 12, 16, 20]
@@ -45,6 +46,7 @@ dict_res = Parallel(n_jobs=N_JOBS)(
         random_state=random_state,
         ica_algo=ica_algo,
         noise_level=noise_level,
+        use_scale_D=use_scale_D,
     ) for m, p, random_state, ica_algo
     in product(m_list, p_list, random_state_list, algo_list)
 )
@@ -58,7 +60,7 @@ print(f"The experiment took {execution_time:.2f} s.")
 beta1_str = str(beta1).replace('.', '')
 beta2_str = str(beta2).replace('.', '')
 results_dir = "/storage/store2/work/aheurteb/LiMVAM/simulation_studies/results/results_p_in_xaxis/"
-save_name = f"DataFrame_with_{nb_seeds}_seeds_beta_{beta1_str}_{beta2_str}_and_time"
+save_name = f"DataFrame_with_{nb_seeds}_seeds_beta_{beta1_str}_{beta2_str}_time_and_scale"
 save_path = results_dir + save_name
 df.to_csv(save_path, index=False)
 print("\n####################################### End #######################################")

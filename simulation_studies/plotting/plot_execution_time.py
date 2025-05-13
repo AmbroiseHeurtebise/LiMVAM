@@ -17,7 +17,7 @@ sns.set(style="white")  # "whitegrid"
 plt.rcParams.update(rc)
 
 # parameters 
-nb_seeds = 2
+nb_seeds = 50
 
 # read dataframe
 simulation_dir = Path("/storage/store2/work/aheurteb/LiMVAM/simulation_studies")

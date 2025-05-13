@@ -19,7 +19,7 @@ rc = {
 plt.rcParams.update(rc)
 
 # parameters 
-nb_seeds = 2
+nb_seeds = 50
 n_metrics = 7
 nb_gaussian_disturbances_list = [4, 0, 2]
 shared_permutation = True

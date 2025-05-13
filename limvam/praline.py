@@ -26,7 +26,7 @@ def profile_loss_b(b, x, y):
 
 # Optimizer (Adam)
 @jit
-def optimize_b(x, y, b_init, steps=500, lr=1e-2):
+def optimize_b(x, y, b_init, steps=1000, lr=1e-2):
     opt_init, opt_update, get_params = optimizers.adam(lr)
     opt_state = opt_init(b_init)
 
@@ -47,7 +47,7 @@ def profile_log_likelihood(b, x, y):
     return -(jnp.linalg.slogdet(S_x)[1] + jnp.linalg.slogdet(S_e)[1])
 
 
-def compute_ratio_for_two_variables(x, y, steps=500, lr=1e-2):
+def compute_ratio_for_two_variables(x, y, steps=1000, lr=1e-2):
     m, _ = x.shape
 
     b_init = jnp.zeros(m)
@@ -60,13 +60,13 @@ def compute_ratio_for_two_variables(x, y, steps=500, lr=1e-2):
     return float(l1 - l2), b_hat
 
 
-def find_parent_variable(X, steps=500, lr=1e-2):
+def find_parent_variable(X, steps=1000, lr=1e-2):
     m, p_current, _ = X.shape
     
     # Compute log-ratios for each pair of variables
     R = np.zeros((p_current, p_current))
     B = np.zeros((m, p_current, p_current))
-    indices = [(i, j) for i in range(p_current) for j in range(p_current) if i != j]  # strictly upper triangular part
+    indices = [(i, j) for i in range(p_current) for j in range(p_current) if i != j]
     for (i, j) in indices:
         ratio, b_hat = compute_ratio_for_two_variables(X[:, i], X[:, j], steps=steps, lr=lr)
         R[i, j] = ratio
@@ -86,7 +86,7 @@ def find_parent_variable(X, steps=500, lr=1e-2):
     return parent, X
 
 
-def estimate_causal_order(X, steps=500, lr=1e-2):
+def estimate_causal_order(X, steps=1000, lr=1e-2):
     p = X.shape[1]
     X_current = X.copy()
     
@@ -162,7 +162,7 @@ def estimate_triangular_matrices_Ti(X):
     return np.array(Ts)
 
 
-def praline(X, steps=500, lr=1e-2):
+def praline(X, steps=1000, lr=1e-2):
     order = estimate_causal_order(X, steps=steps, lr=lr)
     P = np.eye(X.shape[1])[order]
     X_ordered = X[:, order]

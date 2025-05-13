@@ -49,7 +49,8 @@ elif metric == "amari_distance":
     metric_name = "Amari distance"
 
 # labels, dashes and curves order
-labels = ['PairwiseLiMVAM', 'MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
+# labels = ['PairwiseLiMVAM', 'MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
+labels = ['PRaLiNE', 'MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
 dashes = ['', (2, 2), (2, 2), (2, 2), (2, 2)]
 hue_order = ["pairwise", "shica_ml", "shica_j", "lingam", "multi_group_direct_lingam"]
 # remove MVICA LiNGAM and MV-NOTEARS curves

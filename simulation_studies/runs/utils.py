@@ -20,6 +20,7 @@ def sample_data(
     density="gauss_super",
     beta1=1,
     beta2=3,
+    betas_evenly_spaced=False,
     nb_zeros_Ti=0,
     nb_gaussian_disturbances=0,
     nb_equal_variances=0,
@@ -42,10 +43,17 @@ def sample_data(
                 sigmas[indices, -nb_gaussian_disturbances:] = sigmas[indices, -nb_gaussian_disturbances][:, np.newaxis]
     elif density == "sub_gauss_super":
         # sources
-        S1 = gennorm.rvs(beta1, size=(p//3, n), random_state=random_state)
-        S2 = gennorm.rvs(2, size=(p-2*(p//3), n), random_state=random_state)  # Gaussian
-        S3 = gennorm.rvs(beta2, size=(p//3, n), random_state=random_state)
-        S = np.vstack((S1, S2, S3))
+        if betas_evenly_spaced:
+            betas = np.linspace(beta1, beta2, p)
+            S = np.zeros((p, n))
+            for j in range(p):
+                S[j] = gennorm.rvs(betas[j], size=n, random_state=random_state)
+            S = S[rng.permutation(p)]
+        else:
+            S1 = gennorm.rvs(beta1, size=(p//3, n), random_state=random_state)
+            S2 = gennorm.rvs(2, size=(p-2*(p//3), n), random_state=random_state)  # Gaussian
+            S3 = gennorm.rvs(beta2, size=(p//3, n), random_state=random_state)
+            S = np.vstack((S1, S2, S3))
         # noise variances
         sigmas = rng.uniform(size=(m, p))
     else:
@@ -97,6 +105,7 @@ def run_experiment(
     density="gauss_super",
     beta1=1,
     beta2=3,
+    betas_evenly_spaced=False,
     nb_zeros_Ti=0,
     nb_gaussian_disturbances=0,
     nb_equal_variances=0,
@@ -116,6 +125,7 @@ def run_experiment(
         density=density,
         beta1=beta1,
         beta2=beta2,
+        betas_evenly_spaced=betas_evenly_spaced,
         nb_zeros_Ti=nb_zeros_Ti,
         nb_gaussian_disturbances=nb_gaussian_disturbances,
         nb_equal_variances=nb_equal_variances,

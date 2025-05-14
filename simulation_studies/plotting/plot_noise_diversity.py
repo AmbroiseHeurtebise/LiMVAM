@@ -19,7 +19,7 @@ rc = {
 plt.rcParams.update(rc)
 
 # parameters 
-nb_seeds = 4
+nb_seeds = 50
 metric = "error_B"  # or "error_T", "error_P_exact", "error_P_spearmanr", "amari_distance"
 
 # read dataframe
@@ -42,9 +42,9 @@ elif metric == "amari_distance":
     metric_name = "Amari distance"
 
 # labels, dashes and curves order
-labels = ['PRaLiNE', 'MICaDo-ML']
-dashes = ['', (2, 2)]
-hue_order = ["pairwise", "shica_ml"]
+labels = ['PRaLiNE', 'MICaDo-ML', 'MICaDo-J']
+dashes = ['', (2, 2), (2, 2)]
+hue_order = ["pairwise", "shica_ml", "shica_j"]
 
 # plot
 fig, ax = plt.subplots(figsize=(6, 2.7))
@@ -62,15 +62,17 @@ ax.grid(which='both', linewidth=0.5, alpha=0.5)
 ax.get_legend().remove()
 
 # legend
-palette = sns.color_palette()[:2]
+palette = sns.color_palette()
 legend_styles = [
     Line2D([0], [0], color=palette[0], linewidth=2.5, linestyle='-', marker='o', 
            markeredgecolor="white", markersize=6),
     Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='--', marker='X', 
            markeredgecolor="white", markersize=7),
+    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='--', marker='s', 
+           markeredgecolor="white", markersize=6),
 ]
 fig.legend(
-    legend_styles, labels, bbox_to_anchor=(0.5, 0.99), loc="center",
+    legend_styles, labels, bbox_to_anchor=(0.5, 1.03), loc="center",
     ncol=2, borderaxespad=0., fontsize=fontsize
 )
 

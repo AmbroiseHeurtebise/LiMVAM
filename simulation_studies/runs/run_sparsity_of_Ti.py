@@ -8,7 +8,7 @@ from utils import run_experiment
 
 
 # limit number of jobs
-N_JOBS = 4
+N_JOBS = 8
 os.environ["OMP_NUM_THREADS"] = str(N_JOBS)
 os.environ["MKL_NUM_THREADS"] = str(N_JOBS)
 os.environ["NUMEXPR_NUM_THREADS"] = str(N_JOBS)
@@ -21,13 +21,14 @@ noise_level = 1.
 density = "sub_gauss_super"
 beta1 = 1.5
 beta2 = 2.5
+use_scale_D = True
 
 # varying parameters
 shared_causal_ordering_list = [True, False]
 nb_zeros_Ti_list = np.arange(p * (p - 1) // 2 + 1)
 nb_seeds = 30
-random_state_list = np.arange(20, 20 + nb_seeds)
-algo_list = ["shica_j", "shica_ml"]
+random_state_list = np.arange(nb_seeds)
+algo_list = ["shica_j", "shica_ml", "pairwise"]
 
 # run experiment
 nb_expes = len(shared_causal_ordering_list) * len(nb_zeros_Ti_list) * len(random_state_list) \
@@ -48,6 +49,7 @@ dict_res = Parallel(n_jobs=N_JOBS)(
         shared_causal_ordering=shared_causal_ordering,
         random_state=random_state,
         ica_algo=ica_algo,
+        use_scale_D=use_scale_D,
     ) for shared_causal_ordering, nb_zeros_Ti, random_state, ica_algo
     in product(shared_causal_ordering_list, nb_zeros_Ti_list, random_state_list, algo_list)
 )
@@ -58,8 +60,8 @@ execution_time = time() - start
 print(f"The experiment took {execution_time:.2f} s.")
 
 # save dataframe
-results_dir = "/storage/store2/work/aheurteb/MICaDo/simulation_studies/results/results_sparsity_of_Ti/"
-save_name = f"DataFrame_with_{nb_seeds}_seeds"
+results_dir = "/storage/store2/work/aheurteb/LiMVAM/simulation_studies/results/results_sparsity_of_Ti/"
+save_name = f"DataFrame_with_{nb_seeds}_seeds_time_and_scale"
 save_path = results_dir + save_name
 df.to_csv(save_path, index=False)
 print("\n####################################### End #######################################")

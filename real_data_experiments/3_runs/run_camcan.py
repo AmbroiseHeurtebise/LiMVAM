@@ -4,6 +4,7 @@ from time import time
 from pathlib import Path
 import os
 from limvam.micado import micado
+from limvam.praline import praline
 
 
 # Limit the number of jobs
@@ -22,12 +23,14 @@ n_subjects = 152
 parcellation = "aparc_sub"
 n_labels = 38
 subset = False
-group = False
-ica_algo = "shica_ml"
+group = 1
+ica_algo = "pairwise"
 random_state = 42
+steps = 1000  # for PRaLiNE
+lr = 1e-2  # for PRaLiNE
 
 # Load data
-expes_dir = Path("/storage/store2/work/aheurteb/MICaDo/real_data_experiments")
+expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/real_data_experiments")
 load_dir = expes_dir / f"2_data_envelopes/{parcellation}_{n_subjects}_subjects"
 
 X_loaded = np.load(load_dir / f"X.npz")
@@ -96,11 +99,15 @@ elif parcellation =="aparc_sub":
         n_subjects_full = len(X) - len(X) // 2
         X = X[n_subjects_full:]
 
-# Apply our method
-start = time()
-B, T, P, _, _ = micado(
-    X, ica_algo=ica_algo, new_find_order_function=False, random_state=random_state)
-execution_time = time() - start
+# Apply causal discovery method
+if ica_algo == "shica_ml":
+    start = time()
+    B, T, P, _, _ = micado(
+        X, ica_algo=ica_algo, new_find_order_function=False, random_state=random_state)
+    execution_time = time() - start
+elif ica_algo == "pairwise":
+    B, T, P = praline(X, steps=steps, lr=lr)
+
 print(f"The method took {execution_time:.2f} s.")
 
 # Save data

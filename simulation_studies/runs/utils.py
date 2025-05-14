@@ -29,6 +29,14 @@ def sample_data(
     use_scale_D=False,
 ):
     rng = np.random.RandomState(random_state)
+    
+    # scales
+    if use_scale_D:
+        # D = rng.uniform(low=0.1, high=3, size=(m, p))
+        D = rng.uniform(low=0.5, high=2, size=(m, p))
+    else:
+        D = np.ones((m, p))
+    
     if density == "gauss_super":
         # sources
         S_ng = rng.laplace(size=(p-nb_gaussian_disturbances, n))
@@ -40,7 +48,14 @@ def sample_data(
             sigmas[:, -nb_gaussian_disturbances:] = rng.uniform(size=(m, nb_gaussian_disturbances))
             if nb_equal_variances > 0:
                 indices = rng.choice(m, size=nb_equal_variances, replace=False)
-                sigmas[indices, -nb_gaussian_disturbances:] = sigmas[indices, -nb_gaussian_disturbances][:, np.newaxis]
+                if use_scale_D:
+                    # hardcode for p=4
+                    new_values = D[:, 3] / D[:, 2] * sigmas[:, 2]
+                    if len(indices) > 0:
+                        for idx in indices:
+                            sigmas[idx, 3] = new_values[idx]
+                else:
+                    sigmas[indices, -nb_gaussian_disturbances:] = sigmas[indices, -nb_gaussian_disturbances][:, np.newaxis]
     elif density == "sub_gauss_super":
         # sources
         if betas_evenly_spaced:
@@ -62,12 +77,8 @@ def sample_data(
     # noise
     N = noise_level * rng.normal(scale=sigmas[:, :, np.newaxis], size=(m, p, n))
 
-    # scale and disturbances
-    if use_scale_D:
-        D = rng.uniform(low=0.1, high=3, size=(m, p))
-        E = D[:, :, None] * S + N
-    else:
-        E = S + N
+    # disturbances
+    E = D[:, :, None] * S + N
 
     # causal effect matrices T
     T = rng.normal(size=(m, p, p))

@@ -41,7 +41,7 @@ if shared_permutation:
     parent_dir = "shared_P"
 else:
     parent_dir = "multiple_Pi"
-save_name = f"/DataFrame_with_{nb_seeds}_seeds_time_and_scale"
+save_name = f"/DataFrame_with_{nb_seeds}_seeds_time_and_scale_more_steps"
 save_path = results_dir + parent_dir + save_name
 df = pd.read_csv(save_path)
 

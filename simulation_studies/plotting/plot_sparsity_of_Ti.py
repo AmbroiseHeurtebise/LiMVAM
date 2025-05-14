@@ -19,7 +19,7 @@ rc = {
 plt.rcParams.update(rc)
 
 # parameters 
-nb_seeds = 2
+nb_seeds = 30
 metric = "error_P_spearmanr"  # or "error_B", "error_P_exact", "amari_distance"
 
 # read dataframe

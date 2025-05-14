@@ -43,7 +43,7 @@ elif metric == "amari_distance":
 
 # labels, dashes and curves order
 labels = ['PRaLiNE', 'MICaDo-ML', 'MICaDo-J']
-dashes = ['', (2, 2), (2, 2)]
+dashes = ['', '', '']
 hue_order = ["pairwise", "shica_ml", "shica_j"]
 
 # plot
@@ -53,7 +53,7 @@ sns.lineplot(
     errorbar=('ci', 95), hue_order=hue_order, style_order=hue_order, style="ica_algo",
     dashes=dashes, markers=True)
 ax.set_yscale("log")
-xlabel = r"Number of views $i$ s.t. $\frac{\Sigma^i_{jj}}{(D^i_{jj})^2} \neq \frac{\Sigma^i_{j'j'}}{(D^i_{j'j'})^2}$"
+xlabel = r"Number of views $i$ s.t. $\frac{\Sigma^i_{jj}}{(D^i_{jj})^2} = \frac{\Sigma^i_{j'j'}}{(D^i_{j'j'})^2}$"
 ax.set_xlabel(xlabel, fontsize=fontsize)
 ax.xaxis.set_label_coords(0.5, -0.17)
 ax.set_ylabel(metric_name, fontsize=fontsize)
@@ -66,9 +66,9 @@ palette = sns.color_palette()
 legend_styles = [
     Line2D([0], [0], color=palette[0], linewidth=2.5, linestyle='-', marker='o', 
            markeredgecolor="white", markersize=6),
-    Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='--', marker='X', 
+    Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='-', marker='X', 
            markeredgecolor="white", markersize=7),
-    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='--', marker='s', 
+    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='-', marker='s', 
            markeredgecolor="white", markersize=6),
 ]
 fig.legend(

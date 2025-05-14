@@ -23,12 +23,12 @@ nb_seeds = 50
 n_metrics = 7
 nb_gaussian_disturbances_list = [4, 0, 2]
 shared_permutation = True
-errors = ["error_B", "error_T", "error_P_exact"]  # "error_P_spearmanr"
+errors = ["error_B", "error_P_exact"]  # "error_P_spearmanr"
 if shared_permutation:
-    error_names = [r"Error on $B^i$", r"Error on $T^i$", r"Error rate on $P$"]
+    error_names = [r"Error on $B^i$", r"Error rate on $P$"]
     # error_names = [r"Error on $B^i$", r"Error on $T^i$", "Spearman's rank\ncorrelation on" + r" $P$"]
 else:
-    error_names = [r"Error on $B^i$", r"Error on $T^i$", r"Error rate on $P^i$"]
+    error_names = [r"Error on $B^i$", r"Error rate on $P^i$"]
     # error_names = [r"Error on $B^i$", r"Error on $T^i$", "Spearman's rank\ncorrelation on" + r" $P^i$"]
 titles = ["Gaussian", "Non-Gaussian", "Half-G / Half-NG"]
 estimator = "mean"
@@ -52,7 +52,7 @@ filtered_df = df[(df["ica_algo"] != "multiviewica") & (df["ica_algo"] != "mv_not
 hue_order = ["pairwise", "shica_ml", "shica_j", "lingam", "multi_group_direct_lingam"]
 
 # subplots
-fig, axes = plt.subplots(3, 3, figsize=(12, 6), sharex="col", sharey="row")
+fig, axes = plt.subplots(2, 3, figsize=(12, 4.5), sharex="col", sharey="row")
 for i, ax in enumerate(axes.flat):
     # number of Gaussian sources; one for each of the 3 columns
     nb_gaussian_disturbances = nb_gaussian_disturbances_list[i % 3]
@@ -60,7 +60,7 @@ for i, ax in enumerate(axes.flat):
     # error; one for each of the 3 rows
     y = errors[i // 3]
     # subplot
-    dashes = ['', (2, 2), (2, 2), (2, 2), (2, 2)]
+    dashes = ['', '', '', (2, 2), (2, 2)]
     if i // 3 != 2 and estimator == "median":
         sns.lineplot(
             data=data, x="n", y=y, linewidth=2.5, hue="ica_algo", estimator=np.mean,
@@ -74,10 +74,10 @@ for i, ax in enumerate(axes.flat):
             dashes=dashes)
     # set axis in logscale, except for the yaxis of the middle row
     ax.set_xscale("log")
-    if i // 3 != 2:
+    if i // 3 != 1:
         ax.set_yscale("log")
     # correct ylim in first and second rows
-    if i == 0 or i == 3:
+    if i == 0:
         ymin, ymax = ax.get_ylim()
         ax.set_ylim(ymin, 5)
     # ylabel
@@ -99,13 +99,13 @@ plt.subplots_adjust(hspace=0.15)
 palette = sns.color_palette()
 legend_styles = [
     Line2D([0], [0], color=palette[0], linewidth=2.5, linestyle='-'),
-    Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='--'),
-    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='--'),
+    Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='-'),
+    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='-'),
     Line2D([0], [0], color=palette[3], linewidth=2.5, linestyle='--'),
     Line2D([0], [0], color=palette[4], linewidth=2.5, linestyle='--'),
 ]
 fig.legend(
-    legend_styles, labels, bbox_to_anchor=(0.5, 1.03), loc="center",
+    legend_styles, labels, bbox_to_anchor=(0.5, 1.05), loc="center",
     ncol=3, borderaxespad=0., fontsize=fontsize
 )
 

@@ -51,7 +51,7 @@ elif metric == "amari_distance":
 # labels, dashes and curves order
 # labels = ['PairwiseLiMVAM', 'MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
 labels = ['PRaLiNE', 'MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
-dashes = ['', (2, 2), (2, 2), (2, 2), (2, 2)]
+dashes = ['', '', '', (2, 2), (2, 2)]
 hue_order = ["pairwise", "shica_ml", "shica_j", "lingam", "multi_group_direct_lingam"]
 # remove MVICA LiNGAM and MV-NOTEARS curves
 filtered_df = df[(df["ica_algo"] != "multiviewica") & (df["ica_algo"] != "mv_notears")]
@@ -87,9 +87,9 @@ palette = sns.color_palette()
 legend_styles = [
     Line2D([0], [0], color=palette[0], linewidth=2.5, linestyle='-', marker='o', 
            markeredgecolor="white", markersize=6),
-    Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='--', marker='X', 
+    Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='-', marker='X', 
            markeredgecolor="white", markersize=7),
-    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='--', marker='s', 
+    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='-', marker='s', 
            markeredgecolor="white", markersize=5),
     Line2D([0], [0], color=palette[3], linewidth=2.5, linestyle='--', marker='P', 
            markeredgecolor="white", markersize=6),

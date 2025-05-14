@@ -114,6 +114,7 @@ fig.legend(
 plt.xscale("log")
 plt.yscale("log")
 ax.set_xlim([10**(-4.1), 10**0.1])
+ax.set_ylim([10**(-0.9), 10**2.2])
 plt.xlabel(r"Error on $B^i$", fontsize=fontsize, family="serif")
 plt.ylabel("Fitting time (in s)", fontsize=fontsize, family="serif")
 ax.tick_params(which='major', bottom=True, left=True, length=4, width=0.8, color='black')

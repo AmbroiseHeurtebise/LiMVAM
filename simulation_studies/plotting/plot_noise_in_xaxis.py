@@ -27,27 +27,24 @@ error_names = [r"Error on $B^i$", r"Error on $T^i$", r"Error rate on $P$"]
 # error_names = [r"Error on $B^i$", r"Error on $T^i$", "Spearman's rank\ncorrelation on" + r" $P$"]
 titles = ["Gaussian", "Non-Gaussian", "Half-G / Half-NG"]
 estimator = "mean"
-labels = ['MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM', 'MICaDo-MVICA']
+labels = ['PRaLiNE', 'MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
 
 # read dataframe
-results_dir = "/storage/store2/work/aheurteb/MICaDo/simulation_studies/results/"
+results_dir = "/storage/store2/work/aheurteb/LiMVAM/simulation_studies/results/"
 parent_dir = "results_noise_in_xaxis/"
-save_name = f"DataFrame_with_{nb_seeds}_seeds_and_7_metrics"
+save_name = f"DataFrame_with_{nb_seeds}_seeds_time_and_scale"
 save_path = results_dir + parent_dir + save_name
 df = pd.read_csv(save_path)
 
-# remove MVICA LiNGAM curve
-filtered_df = df  # df[df["ica_algo"] != "multiviewica"]
-
 # change the curves order
-hue_order = ["shica_ml", "shica_j", "lingam", "multi_group_direct_lingam", "multiviewica"]
+hue_order = ["pairwise", "shica_ml", "shica_j", "lingam", "multi_group_direct_lingam"]
 
 # subplots
 fig, axes = plt.subplots(3, 3, figsize=(12, 6), sharex="col", sharey="row")
 for i, ax in enumerate(axes.flat):
     # number of Gaussian sources; one for each of the 3 columns
     nb_gaussian_disturbances = nb_gaussian_disturbances_list[i % 3]
-    data = filtered_df[filtered_df["nb_gaussian_disturbances"] == nb_gaussian_disturbances]
+    data = df[df["nb_gaussian_disturbances"] == nb_gaussian_disturbances]
     # error; one for each of the 3 rows
     y = errors[i // 3]
     # subplot
@@ -56,18 +53,18 @@ for i, ax in enumerate(axes.flat):
             data=data, x="noise_level", y=y, linewidth=2.5, hue="ica_algo", estimator=np.mean,
             ax=ax, errorbar=lambda x: (np.quantile(x, 0.025), np.quantile(x, 0.975)),
             hue_order=hue_order, style_order=hue_order, style="ica_algo",
-            dashes=['', '', (2, 2), (2, 2), ''])
+            dashes=['', '', '', (2, 2), (2, 2)])
     else:
         sns.lineplot(
             data=data, x="noise_level", y=y, linewidth=2.5, hue="ica_algo", ax=ax,
             errorbar=('ci', 95), hue_order=hue_order, style_order=hue_order,
-            style="ica_algo", dashes=['', '', (2, 2), (2, 2), ''])
+            style="ica_algo", dashes=['', '', '', (2, 2), (2, 2)])
     # set axis in logscale, except for the yaxis of the middle row
     ax.set_xscale("log")
     if i // 3 != 2:
         ax.set_yscale("log")
     # correct ylim in the second row
-    if i == 3:
+    if i == 0 or i == 3:
         ymin, ymax = ax.get_ylim()
         ax.set_ylim(ymin, 1e5)
     # ylabel
@@ -90,9 +87,9 @@ palette = sns.color_palette()[:5]
 legend_styles = [
     Line2D([0], [0], color=palette[0], linewidth=2.5, linestyle='-'),
     Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='-'),
-    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='--'),
+    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='-'),
     Line2D([0], [0], color=palette[3], linewidth=2.5, linestyle='--'),
-    Line2D([0], [0], color=palette[4], linewidth=2.5, linestyle='-'),
+    Line2D([0], [0], color=palette[4], linewidth=2.5, linestyle='--'),
 ]
 fig.legend(
     legend_styles, labels, bbox_to_anchor=(0.5, 1.05), loc="center",
@@ -100,7 +97,7 @@ fig.legend(
 )
 
 # save figure
-figures_dir = Path("/storage/store2/work/aheurteb/MICaDo/simulation_studies/figures")
+figures_dir = Path("/storage/store2/work/aheurteb/LiMVAM/simulation_studies/figures")
 figures_dir.mkdir(parents=True, exist_ok=True)
 plt.savefig(figures_dir / "simulation_noise_in_xaxis.pdf", bbox_inches="tight")
 plt.show()

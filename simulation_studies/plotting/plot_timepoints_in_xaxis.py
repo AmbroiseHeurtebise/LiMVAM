@@ -32,8 +32,7 @@ else:
     # error_names = [r"Error on $B^i$", r"Error on $T^i$", "Spearman's rank\ncorrelation on" + r" $P^i$"]
 titles = ["Gaussian", "Non-Gaussian", "Half-G / Half-NG"]
 estimator = "mean"
-# labels = ['MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM', 'MICaDo-MVICA']
-labels = ['MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM', 'PairwiseLiMVAM', 'MV-NOTEARS']
+labels = ['PRaLiNE', 'MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
 
 # read dataframe
 # results_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/results/results_timepoints_in_xaxis/"
@@ -42,18 +41,15 @@ if shared_permutation:
     parent_dir = "shared_P"
 else:
     parent_dir = "multiple_Pi"
-# save_name = f"/DataFrame_with_{nb_seeds}_seeds_and_{n_metrics}_metrics"
 save_name = f"/DataFrame_with_{nb_seeds}_seeds_and_time"
 save_path = results_dir + parent_dir + save_name
 df = pd.read_csv(save_path)
 
-# remove MVICA LiNGAM curve
-filtered_df = df[df["ica_algo"] != "multiviewica"]
-# filtered_df = df
+# remove MVICA-LiNGAM and MV-NOTEARS curves
+filtered_df = df[(df["ica_algo"] != "multiviewica") & (df["ica_algo"] != "mv_notears")]
 
 # change the curves order
-# hue_order = ["shica_ml", "shica_j", "lingam", "multi_group_direct_lingam", "multiviewica"]
-hue_order = ["shica_ml", "shica_j", "lingam", "multi_group_direct_lingam", "pairwise", "mv_notears"]
+hue_order = ["pairwise", "shica_ml", "shica_j", "lingam", "multi_group_direct_lingam"]
 
 # subplots
 fig, axes = plt.subplots(3, 3, figsize=(12, 6), sharex="col", sharey="row")
@@ -64,8 +60,7 @@ for i, ax in enumerate(axes.flat):
     # error; one for each of the 3 rows
     y = errors[i // 3]
     # subplot
-    # dashes = ['', '', (2, 2), (2, 2), '']
-    dashes = ['', '', (2, 2), (2, 2), '', '']
+    dashes = ['', (2, 2), (2, 2), (2, 2), (2, 2)]
     if i // 3 != 2 and estimator == "median":
         sns.lineplot(
             data=data, x="n", y=y, linewidth=2.5, hue="ica_algo", estimator=np.mean,
@@ -101,20 +96,14 @@ plt.gcf().align_labels()
 plt.tight_layout()
 plt.subplots_adjust(hspace=0.15)
 # legend
-palette = sns.color_palette()[:7]
+palette = sns.color_palette()
 legend_styles = [
     Line2D([0], [0], color=palette[0], linewidth=2.5, linestyle='-'),
-    Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='-'),
+    Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='--'),
     Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='--'),
     Line2D([0], [0], color=palette[3], linewidth=2.5, linestyle='--'),
-    # Line2D([0], [0], color=palette[4], linewidth=2.5, linestyle='-'),
-    Line2D([0], [0], color=palette[4], linewidth=2.5, linestyle='-'),
-    Line2D([0], [0], color=palette[5], linewidth=2.5, linestyle='-'),
+    Line2D([0], [0], color=palette[4], linewidth=2.5, linestyle='--'),
 ]
-# fig.legend(
-#     legend_styles, labels, bbox_to_anchor=(0.5, 1.05), loc="center",
-#     ncol=3, borderaxespad=0., fontsize=fontsize
-# )
 fig.legend(
     legend_styles, labels, bbox_to_anchor=(0.5, 1.03), loc="center",
     ncol=3, borderaxespad=0., fontsize=fontsize

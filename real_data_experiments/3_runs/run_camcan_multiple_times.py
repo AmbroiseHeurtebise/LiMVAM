@@ -2,11 +2,14 @@ import numpy as np
 import pickle
 from pathlib import Path
 import os
+from time import time
+from joblib import Parallel, delayed
 from limvam.micado import micado
+from limvam.praline import praline
 
 
 # Limit the number of jobs
-N_JOBS = 4
+N_JOBS = 10
 os.environ["OMP_NUM_THREADS"] = str(N_JOBS)
 os.environ["MKL_NUM_THREADS"] = str(N_JOBS)
 os.environ["NUMEXPR_NUM_THREADS"] = str(N_JOBS)
@@ -18,11 +21,14 @@ os.environ["XLA_FLAGS"] = (
 
 # Parameters
 n_runs = 50
-keep_subjects_rate = 1 / 2  # only keep 50% of the subjects
+# keep_subjects_rate = 1 / 2  # only keep 50% of the subjects
+n_subjects_batch = 30  # only keep 30 subjects
 ica_algo = "shica_ml"
+steps = 1000
+lr = 1e-2
 
 # Load data
-expes_dir = Path("/storage/store2/work/aheurteb/MICaDo/real_data_experiments")
+expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/real_data_experiments")
 load_dir = expes_dir / f"2_data_envelopes/aparc_sub_152_subjects"
 
 X_loaded = np.load(load_dir / f"X.npz")
@@ -66,20 +72,33 @@ labels = [label for label in labels if label.name in selected_label_names]
 n_subjects_full = len(X)
 
 # Run our method ``n_runs`` times
-n_subjects_batch = int(n_subjects_full * keep_subjects_rate)
+# n_subjects_batch = int(n_subjects_full * keep_subjects_rate)
 B_total = np.zeros((n_runs, n_subjects_batch, n_labels, n_labels))
 T_total = np.zeros((n_runs, n_subjects_batch, n_labels, n_labels))
 P_total = np.zeros((n_runs, n_labels, n_labels))
-for i in range(n_runs):
-    print(f"Run number {i} / {n_runs}")
+
+def single_run(i):
     rng = np.random.RandomState(i)
-    # Select of subset of subjects
     subjects_idx = rng.choice(n_subjects_full, size=n_subjects_batch, replace=False)
     X_subset = X[subjects_idx]
-    # Apply our method
-    B, T, P, _, _ = micado(
-        X_subset, ica_algo=ica_algo, random_state=i,
-        new_find_order_function=False)
+    
+    if ica_algo == "shica_ml":
+        B, T, P, _, _ = micado(X_subset, ica_algo=ica_algo, random_state=i)
+    elif ica_algo == "pairwise":
+        B, T, P = praline(X, steps=steps, lr=lr)
+    return B, T, P
+
+start = time()
+
+results = Parallel(n_jobs=N_JOBS, verbose=10)(
+    delayed(single_run)(i) for i in range(n_runs)
+)
+
+execution_time = time() - start
+print(f"The method took {execution_time:.2f} s.")
+
+# Unpack the results
+for i, (B, T, P) in enumerate(results):
     B_total[i] = B
     T_total[i] = T
     P_total[i] = P

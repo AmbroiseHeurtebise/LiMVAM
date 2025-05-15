@@ -14,13 +14,15 @@ parcellation = "aparc_sub"
 n_arrows = 10
 only_clean = False
 seed = 2
-groups = True
+groups = False
 ica_algo = "pairwise"
 
 # Load results
 expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/real_data_experiments")
 if only_clean:
     results_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects}_subjects_clean")
+elif ica_algo == "pairwise":
+    results_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects}_subjects_{ica_algo}")
 else:
     results_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects}_subjects_seed{seed}_{ica_algo}")
 

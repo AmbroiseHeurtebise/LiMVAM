@@ -23,7 +23,7 @@ n_subjects = 152
 parcellation = "aparc_sub"
 n_labels = 38
 subset = False
-group = 1
+group = 2
 ica_algo = "pairwise"
 random_state = 42
 steps = 1000  # for PRaLiNE
@@ -106,15 +106,17 @@ if ica_algo == "shica_ml":
         X, ica_algo=ica_algo, new_find_order_function=False, random_state=random_state)
     execution_time = time() - start
 elif ica_algo == "pairwise":
+    start = time()
     B, T, P = praline(X, steps=steps, lr=lr)
+    execution_time = time() - start
 
 print(f"The method took {execution_time:.2f} s.")
 
 # Save data
 if group == 1:
-    group_suffix = "_group1_"
+    group_suffix = "_group1"
 elif group == 2:
-    group_suffix = "_group2_"
+    group_suffix = "_group2"
 else:
     group_suffix = ""
 save_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects_full}_subjects{group_suffix}_{ica_algo}")

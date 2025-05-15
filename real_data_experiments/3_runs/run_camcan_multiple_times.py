@@ -9,7 +9,7 @@ from limvam.praline import praline
 
 
 # Limit the number of jobs
-N_JOBS = 10
+N_JOBS = 5
 os.environ["OMP_NUM_THREADS"] = str(N_JOBS)
 os.environ["MKL_NUM_THREADS"] = str(N_JOBS)
 os.environ["NUMEXPR_NUM_THREADS"] = str(N_JOBS)
@@ -23,7 +23,7 @@ os.environ["XLA_FLAGS"] = (
 n_runs = 50
 # keep_subjects_rate = 1 / 2  # only keep 50% of the subjects
 n_subjects_batch = 30  # only keep 30 subjects
-ica_algo = "shica_ml"
+ica_algo = "pairwise"
 steps = 1000
 lr = 1e-2
 
@@ -85,7 +85,7 @@ def single_run(i):
     if ica_algo == "shica_ml":
         B, T, P, _, _ = micado(X_subset, ica_algo=ica_algo, random_state=i)
     elif ica_algo == "pairwise":
-        B, T, P = praline(X, steps=steps, lr=lr)
+        B, T, P = praline(X_subset, steps=steps, lr=lr)
     return B, T, P
 
 start = time()

@@ -14,11 +14,11 @@ parcellation = "aparc_sub"
 n_arrows = 10
 only_clean = False
 seed = 2
-groups = False
-ica_algo = "multiviewica"
+groups = True
+ica_algo = "pairwise"
 
 # Load results
-expes_dir = Path("/storage/store2/work/aheurteb/MICaDo/real_data_experiments")
+expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/real_data_experiments")
 if only_clean:
     results_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects}_subjects_clean")
 else:
@@ -26,8 +26,8 @@ else:
 
 if groups:
     n_subjects //= 2
-    results_dir1 = Path(expes_dir / f"4_results/{parcellation}_{n_subjects}_subjects_group1")
-    results_dir2 = Path(expes_dir / f"4_results/{parcellation}_{n_subjects}_subjects_group2")
+    results_dir1 = Path(expes_dir / f"4_results/{parcellation}_{n_subjects}_subjects_group1_{ica_algo}")
+    results_dir2 = Path(expes_dir / f"4_results/{parcellation}_{n_subjects}_subjects_group2_{ica_algo}")
     P1 = np.load(results_dir1 / "P.npy")
     T1 = np.load(results_dir1 / "T.npy")
     B1 = np.load(results_dir1 / "B.npy")
@@ -54,10 +54,14 @@ if groups:
 # %%
 # Plot average matrix T (should be lower triangular)
 if groups:
-    T = T1
-plt.imshow(np.mean(np.abs(T), axis=0))
-plt.colorbar()
-plt.title("Average absolute value lower triangular matrix T")
+    fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+    axes[0].imshow(np.mean(np.abs(T1), axis=0))
+    axes[1].imshow(np.mean(np.abs(T2), axis=0))
+    fig.suptitle(r"Average absolute value lower triangular matrices $T^i$")
+else:
+    plt.imshow(np.mean(np.abs(T), axis=0))
+    plt.colorbar()
+    plt.title("Average absolute value lower triangular matrix T")
 plt.show()
 
 # %%
@@ -107,7 +111,7 @@ homogenise = False
 if homogenise:
     B_avg_subset = np.sign(B_avg_subset) * np.sqrt(np.abs(B_avg_subset))
 fig, ax = plt.subplots()
-norm = TwoSlopeNorm(vmin=np.min(B_avg_subset), vmax=np.max(B_avg_subset), vcenter=0)
+norm = TwoSlopeNorm(vmin=min(-1, np.min(B_avg_subset)), vmax=max(1, np.max(B_avg_subset)), vcenter=0)
 plt.imshow(B_avg_subset, norm=norm, cmap="coolwarm")
 plt.colorbar()
 plt.title(f"Average adjacency matrix B ({n_arrows} highest effects)")
@@ -118,7 +122,7 @@ ax.set_yticklabels(label_names)
 plt.show()
 
 # %%
-order = np.argmax(P, axis=1)
+order = np.argmax(P1, axis=1)
 labels_ordered = [label_names[order[i]] for i in range(len(label_names))]
 labels_ordered
 

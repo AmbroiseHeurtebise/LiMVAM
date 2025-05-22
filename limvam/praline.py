@@ -1,3 +1,8 @@
+"""
+Python implementation of the Pairwise likelihood RAtios for 
+LInear Non-gaussian Estimation (PRaLiNE) algorithm.
+"""
+
 import jax.numpy as jnp
 from jax import grad, jit
 from jax.example_libraries import optimizers

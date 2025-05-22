@@ -1,6 +1,6 @@
-# Linear Multi-View Acyclic Model
+# Linear Multi-View Acyclic Model (LiMVAM)
 
-This repository contains the algorithms PRaLiNE and MICaDo (both variants), which estimate a causal order and causal effect matrices from multiple datasets at once.
+This repository contains the algorithms PRaLiNE and MICaDo (both variants MICaDo-ML and MICaDo-J), which estimate a causal order and causal effect matrices from multiple datasets at once.
 
 ## How to install
 
@@ -18,7 +18,19 @@ The second one, ```example_praline.ipynb``` shows how to use PRaLiNE in the cont
 
 ## Reproduce simulation studies
 
-The code to reproduce the simulation studies from figures 1, 2, and 4 to 7 is in ```simulation_studies```.
+The code to reproduce the simulation studies is in ```simulation_studies```. 
+
+Specifically, the files to run
+- figure 1 is in ```simulation_studies/runs/run_timepoints_in_xaxis.py```
+- figure 2 is in ```simulation_studies/runs/run_execution_time.py```
+- figure 4 is in ```simulation_studies/runs/run_p_in_xaxis.py```
+- figure 5 is in ```simulation_studies/runs/run_noise_in_xaxis.py```
+- figure 6 is in ```simulation_studies/runs/run_noise_diversity.py```
+- figure 7 is in ```simulation_studies/runs/run_sparsity_of_Ti.py```
+
+Then, the results of the simulations are stored in ```simulation_studies/results```.
+
+The plotting files are in ```simulation_studies/plotting```, and the obtained figures are in ```simulation_studies/figures```.
 
 ## Reproduce Cam-CAN experiments
 

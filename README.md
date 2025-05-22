@@ -20,13 +20,13 @@ The second one, ```example_praline.ipynb``` shows how to use PRaLiNE in the cont
 
 The code to reproduce the simulation studies is in ```simulation_studies```. 
 
-Specifically, the files to run
-- figure 1 is in ```simulation_studies/runs/run_timepoints_in_xaxis.py```
-- figure 2 is in ```simulation_studies/runs/run_execution_time.py```
-- figure 4 is in ```simulation_studies/runs/run_p_in_xaxis.py```
-- figure 5 is in ```simulation_studies/runs/run_noise_in_xaxis.py```
-- figure 6 is in ```simulation_studies/runs/run_noise_diversity.py```
-- figure 7 is in ```simulation_studies/runs/run_sparsity_of_Ti.py```
+Specifically:
+- the file to run figure 1 is in ```simulation_studies/runs/run_timepoints_in_xaxis.py```
+- the file to run figure 2 is in ```simulation_studies/runs/run_execution_time.py```
+- the file to run figure 4 is in ```simulation_studies/runs/run_p_in_xaxis.py```
+- the file to run figure 5 is in ```simulation_studies/runs/run_noise_in_xaxis.py```
+- the file to run figure 6 is in ```simulation_studies/runs/run_noise_diversity.py```
+- the file to run figure 7 is in ```simulation_studies/runs/run_sparsity_of_Ti.py```
 
 Then, the results of the simulations are stored in ```simulation_studies/results```.
 
@@ -35,3 +35,6 @@ The plotting files are in ```simulation_studies/plotting```, and the obtained fi
 ## Reproduce Cam-CAN experiments
 
 The code to reproduce the Cam-CAN experiments from figures 3 and 8 to 10 is in ```real_data_experiments```.
+However, running these experiments requires downloading the Cam-CAN dataset, and may require to adapt some paths.
+
+The repository ```real_data_experiments/1_preprocessing``` is used to preprocess Cam-CAN data, and then stores the envelopes of oscillatory signals in ```real_data_experiments/2_data_envelopes```. These envelopes are used in the two files in ```real_data_experiments/3_runs```, and the corresponding results are stored in ```real_data_experiments/4_results```. Finally, these results are used in ```real_data_experiments/5_plotting``` to obtain the desired figures.

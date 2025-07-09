@@ -23,8 +23,9 @@ def residual_covariance(b, x, y):
 
 
 # Profile log-likelihood (up to constant): log det S_e(b)
-def profile_loss_b(b, x, y):
+def profile_loss_b(b, x, y, eps=1e-5):
     S_e = residual_covariance(b, x, y)
+    S_e = S_e + eps * jnp.eye(S_e.shape[0])  # useful when b tends to 0
     sign, logdet = jnp.linalg.slogdet(S_e)
     return logdet  # drop the sign: S_e should be pos-def anyway
 
@@ -151,6 +152,8 @@ def estimate_triangular_matrices_Ti(X):
         Y_big = np.concatenate(Ys, axis=0) # (n*m,)
         
         # 5) Compute weight W = inv(Σ_j) ⊗ I_n
+        if np.linalg.matrix_rank(Σ_j) < m:
+            Σ_j = Σ_j + 1e-6 * np.eye(m)
         Σ_j_inv = np.linalg.inv(Σ_j)
         W = np.kron(Σ_j_inv, np.eye(n))
         

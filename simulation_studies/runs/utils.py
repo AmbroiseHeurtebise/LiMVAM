@@ -10,6 +10,17 @@ import warnings
 from sklearn.exceptions import ConvergenceWarning
 
 
+# non-linear activation: f = (1 - alpha) * identity + alpha * logistic
+def f1(x):
+    return x
+
+def f2(x):
+    return 2 / (1 + np.exp(-x)) - 1
+
+def f(x, alpha):
+    return (1 - alpha) * f1(x) + alpha * f2(x)
+
+
 # function that samples data according to our model
 # we use similar parameters as in Fig. 2 of the ShICA paper
 def sample_data(
@@ -27,6 +38,7 @@ def sample_data(
     random_state=None,
     shared_causal_ordering=True,
     use_scale_D=False,
+    non_linearity_alpha=None,
 ):
     rng = np.random.RandomState(random_state)
     
@@ -63,12 +75,12 @@ def sample_data(
             S = np.zeros((p, n))
             for j in range(p):
                 S[j] = gennorm.rvs(betas[j], size=n, random_state=random_state)
-            S = S[rng.permutation(p)]
         else:
             S1 = gennorm.rvs(beta1, size=(p//3, n), random_state=random_state)
             S2 = gennorm.rvs(2, size=(p-2*(p//3), n), random_state=random_state)  # Gaussian
             S3 = gennorm.rvs(beta2, size=(p//3, n), random_state=random_state)
             S = np.vstack((S1, S2, S3))
+        S = S[rng.permutation(p)]
         # noise variances
         sigmas = rng.uniform(size=(m, p))
     else:
@@ -105,6 +117,11 @@ def sample_data(
 
     # observations
     X = np.array([Ai @ Ei for Ai, Ei in zip(A, E)])
+    
+    # non-linear activation
+    if non_linearity_alpha is not None:
+        X = f(X, alpha=non_linearity_alpha)
+
     return X, B, T, P, A
 
 
@@ -124,6 +141,7 @@ def run_experiment(
     random_state=None,
     shared_causal_ordering=True,
     use_scale_D=False,
+    non_linearity_alpha=None,
 ):
     if density == "sub_gauss_super":
         nb_gaussian_disturbances = p - 2 * (p // 3)
@@ -143,6 +161,7 @@ def run_experiment(
         random_state=random_state,
         shared_causal_ordering=shared_causal_ordering,
         use_scale_D=use_scale_D,
+        non_linearity_alpha=non_linearity_alpha,
     )
 
     # apply either our method, Multi Group DirectLiNGAM, or LiNGAM
@@ -275,6 +294,7 @@ def run_experiment(
         "nb_equal_variances": nb_equal_variances,
         "nb_zeros_Ti": nb_zeros_Ti,
         "shared_causal_ordering": shared_causal_ordering,
+        "non_linearity_alpha": non_linearity_alpha,
         "random_state": random_state,
         "error_B": error_B,
         "error_B_abs": error_B_abs,

@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 import matplotlib.colors as mcolors
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import pickle
 from pathlib import Path
 from scipy.stats import spearmanr, pearsonr
@@ -17,7 +18,7 @@ random_state = 42
 rng = np.random.RandomState(random_state)
 
 # Load results
-expes_dir = Path("/storage/store2/work/aheurteb/MICaDo/real_data_experiments")
+expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/real_data_experiments")
 results_dir = Path(expes_dir / f"4_results/aparc_sub_{n_subjects}_subjects_{n_runs}_runs_{ica_algo}")
 
 P_total = np.load(results_dir / "P_total.npy")
@@ -28,7 +29,7 @@ with open(results_dir / f"labels.pkl", "rb") as f:
 
 # %%
 # matplotlib style
-fontsize = 20
+fontsize = 26
 rc = {
     "font.size": fontsize,
     "xtick.labelsize": fontsize,
@@ -54,21 +55,30 @@ upper_triangular_values = spearmanr_matrix[np.triu_indices(n_runs, k=1)]
 avg_corr = np.mean(upper_triangular_values)
 
 # Plot obtained coefficients
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(5, 5))
 norm = TwoSlopeNorm(vmin=-1, vmax=1, vcenter=0)
-plt.imshow(spearmanr_matrix, norm=norm, cmap="coolwarm")
-plt.colorbar()
-plt.title(f"Average = {avg_corr:.2f}")
+im = plt.imshow(spearmanr_matrix, norm=norm, cmap="coolwarm")
+# plt.title(f"Average = {avg_corr:.2f}")
 # ax.set_xticks(np.arange(n_runs))
 # ax.set_yticks(np.arange(n_runs))
 ax.set_xlabel("Runs")
 ax.set_ylabel("Runs")
+ax.set_xticks([])
+ax.set_yticks([])
+
+# colorbar
+divider = make_axes_locatable(ax)
+cax = divider.append_axes("right", size="5%", pad=0.2)
+cbar = fig.colorbar(im, cax=cax, ticks=[-1, 0, 1])
+cbar.ax.set_yticklabels(["-1", "0", "1"])
 
 save = True
 if save:
-    figures_dir = "/storage/store2/work/aheurteb/MICaDo/real_data_experiments/6_figures//"
+    figures_dir = "/storage/store2/work/aheurteb/LiMVAM/real_data_experiments/6_figures//"
     plt.savefig(figures_dir + f"pearson_coefs_B.pdf", bbox_inches="tight")
 plt.show()
+
+print(f"Average = {avg_corr:.2f}")
 
 # %%
 # Plot median matrix T (should be lower triangular)
@@ -82,7 +92,7 @@ plt.show()
 # Plot median adjacency matrix
 B_median = np.median(B_total, axis=(0, 1))
 fig, ax = plt.subplots()
-norm = TwoSlopeNorm(vmin=np.min(B_median), vmax=np.max(B_median), vcenter=0)
+norm = TwoSlopeNorm(vmin=min(-1, np.min(B_median)), vmax=max(1, np.max(B_median)), vcenter=0)
 plt.imshow(B_median, norm=norm, cmap="coolwarm")
 plt.colorbar()
 plt.title("Median adjacency matrix B")
@@ -103,7 +113,7 @@ B_avg_rank = ranked_flat.reshape(M.shape)
 B_avg_subset = B_median * (B_avg_rank < n_arrows)
 
 fig, ax = plt.subplots()
-norm = TwoSlopeNorm(vmin=np.min(B_avg_subset), vmax=np.max(B_avg_subset), vcenter=0)
+norm = TwoSlopeNorm(vmin=min(-1, np.min(B_avg_subset)), vmax=max(1, np.max(B_avg_subset)), vcenter=0)
 plt.imshow(B_avg_subset, norm=norm, cmap="coolwarm")
 plt.colorbar()
 plt.title(f"Median adjacency matrix B ({n_arrows} highest effects)")
@@ -117,8 +127,8 @@ plt.show()
 # random select 6 subjects
 random_state = 46
 rng = np.random.RandomState(random_state)
-idx = rng.choice(len(B_total), size=6, replace=False)
-idx[2] = 44
+idx = rng.choice(B_total.shape[1], size=6, replace=False)
+# idx[2] = 44
 B_median_2 = np.median(B_total, axis=(0))  # shape (49, 10, 10)
 B_subset = B_median_2[idx]
 
@@ -187,13 +197,13 @@ ax.set_ylabel("Runs")
 
 save = True
 if save:
-    figures_dir = "/storage/store2/work/aheurteb/MICaDo/real_data_experiments/6_figures//"
+    figures_dir = "/storage/store2/work/aheurteb/LiMVAM/real_data_experiments/6_figures//"
     plt.savefig(figures_dir + f"spearmanr_coefs_P.pdf", bbox_inches="tight")
 plt.show()
 
 # %%
 # Histogram of the correlations
-fig, ax = plt.subplots(figsize=(11, 8))
+fig, ax = plt.subplots(figsize=(11, 4))
 nbins = 50
 bins = np.linspace(-1, 1, nbins + 1)
 n, bins, patches = ax.hist(upper_triangular_values, bins=bins, edgecolor='black')
@@ -205,21 +215,23 @@ for center, patch in zip(bin_centers, patches):
     color = cmap(norm(center))
     patch.set_facecolor(color)
 # vline and labels
-ax.vlines(x=0, ymin=0, ymax=n.max(), ls="--", colors="grey")
-ax.grid()
-ax.set_xlabel("Spearman's rank correlation")
-label = ax.set_ylabel("Number of pairs\nof permutations")
-label.set_position((0., 0.42))
+ax.vlines(x=0, ymin=0, ymax=n.max(), ls="--", colors="black", lw=2.5)
+# ax.set_xlabel("Spearman's rank correlation")
+ax.set_xlabel("")
+# label = ax.set_ylabel("Number of pairs\nof permutations")
+# label.set_position((0., 0.42))
+ax.set_xticks([-1, 0, 1])
+ax.set_yticks([])
 # Add a text box for the mean
 textstr = f"Average = {avg_corr:.2f}"
 props = dict(boxstyle="round", facecolor="white", alpha=0.8)
-ax.text(0.48, 0.95, textstr, transform=ax.transAxes,
+ax.text(0.4, 0.8, textstr, transform=ax.transAxes,
         verticalalignment='top', horizontalalignment='right', bbox=props)
 # save
 save = True
 if save:
     # fig.subplots_adjust(left=0.15, bottom=0.15, top=1.1)
-    figures_dir = "/storage/store2/work/aheurteb/MICaDo/real_data_experiments/6_figures//"
+    figures_dir = "/storage/store2/work/aheurteb/LiMVAM/real_data_experiments/6_figures//"
     plt.savefig(figures_dir + f"histogram_spearmanr_coefs_P.pdf", bbox_inches="tight")
 plt.show()
 

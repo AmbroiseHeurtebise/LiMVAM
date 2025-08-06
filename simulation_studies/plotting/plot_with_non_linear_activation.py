@@ -19,7 +19,7 @@ rc = {
 plt.rcParams.update(rc)
 
 # parameters 
-nb_seeds = 2
+nb_seeds = 100
 metric = "error_B"  # or "error_T", "error_P_exact", "error_P_spearmanr", "amari_distance"
 
 # read dataframe
@@ -84,9 +84,11 @@ caption = (
     # "Caption: Data are generated with $m=6$ views and $p=5$ disturbances,\n"
     # "consisting of sub-Gaussian, Gaussian, and super-Gaussian disturbances.\n"
     "Caption: We apply a non-linear function $f$ to the observations,\n"
-    r"where $f(x) = (1 - \alpha) x + \alpha$ tanh$(x)$."
+    r"where $f(x) = (1 - \alpha) x + \alpha (2$ logistic$(x) - 1)$." + "\n"
+    r"Recall that the observations are $\boldsymbol{x}^i = (\boldsymbol{I} - \boldsymbol{B}^i)^{-1}$"
+    r"$(\boldsymbol{D}^i \boldsymbol{s} + \boldsymbol{n}^i)$."
 )
-fig.text(0.5, -0.25, caption, ha='center', va='center', fontsize=fontsize)
+fig.text(0.5, -0.3, caption, ha='center', va='center', fontsize=fontsize)
 
 # save figure
 figures_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies/figures")

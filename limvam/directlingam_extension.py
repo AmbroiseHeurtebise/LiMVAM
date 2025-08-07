@@ -1,36 +1,60 @@
 import numpy as np
 
 
-def compute_residual(xi, xj):
-    """Residual when xi is regressed on xj (scalar slope)."""
-    beta = np.cov(xi, xj, bias=True)[0, 1] / np.var(xj)
-    return xi - beta * xj
+def compute_residuals_with_univariate_OLS(x, y):
+    """
+    Regress y on x for multiple views and return residuals.
+    x, y: arrays of shape (m, n)
+    Returns residuals of shape (m, n)
+    """
+    cov = np.mean(x * y, axis=1)  # shape (m,)
+    var_x = np.mean(x * x, axis=1)  # shape (m,)
+    beta = cov / var_x
+    return y - beta[:, None] * x
+
+
+def correlation_squared(a, b):
+    """
+    Compute squared correlation matrix between a and b.
+    a, b: arrays of shape (m, n)
+    Returns scalar score (Frobenius norm of the correlation matrix)
+    """
+    cov = a @ b.T / a.shape[1]
+    std_a = a.std(axis=1, ddof=1)
+    std_b = b.std(axis=1, ddof=1)
+    corr = cov / np.outer(std_a, std_b)
+    return np.sum(corr ** 2)
+
+
+def find_direction(x, y):
+    """
+    Compare x → y and y → x using residual–predictor correlation.
+    Lower score indicates lower correlation between residuals and predictor.
+    x, y: arrays of shape (m, n)
+    Returns (score_x_to_y, score_y_to_x)
+    """
+    r_y_on_x = compute_residuals_with_univariate_OLS(x, y)
+    r_x_on_y = compute_residuals_with_univariate_OLS(y, x)
+    score_x_to_y = correlation_squared(x, r_y_on_x)
+    score_y_to_x = correlation_squared(y, r_x_on_y)
+    return score_x_to_y, score_y_to_x
 
 
 def find_parent_variable(X):
+    """
+    Identify the root variable (with no parents).
+    X: array of shape (m, p, n) for m views, p variables, n samples
+    Returns index of root variable
+    """
     m, p, n = X.shape
-
-    # center each time series
     X_centered = X - X.mean(axis=-1, keepdims=True)
 
     scores = np.zeros((p, p))
 
     for i in range(p):
-        for j in range(p):
-            if i == j:
-                continue
-            # compute residuals for all m views at once
-            r = np.empty((m, n))
-            for k in range(m):
-                r[k] = compute_residual(X_centered[k, i], X_centered[k, j])
+        for j in range(i + 1, p):
+            score_ij, score_ji = find_direction(X_centered[:, i], X_centered[:, j])
+            scores[i, j] = score_ij
+            scores[j, i] = score_ji
 
-            # correlation between residuals and x_i
-            std_r = r.std(axis=1, ddof=1)
-            std_x = X_centered[:, i].std(axis=1, ddof=1)
-            cov = (r @ X_centered[:, i].T) / (n - 1)
-            corr = cov / np.outer(std_r, std_x)
-
-            scores[i, j] = np.sum(corr**2)  # Frobenius norm
-
-    # choose variable minimizing column sum of scores
-    return np.argmin(np.sum(scores, axis=0))
+    return np.argmin(np.sum(scores, axis=1))

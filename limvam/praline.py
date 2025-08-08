@@ -8,7 +8,7 @@ from jax import grad, jit
 from jax.example_libraries import optimizers
 from jax import lax
 import numpy as np
-from scipy.linalg import block_diag
+from .utils import estimate_triangular_matrices_Ti
 
 
 # Residuals: shape (m, n)
@@ -106,68 +106,6 @@ def estimate_causal_order(X, steps=1000, lr=1e-2):
     order.append(remaining_indices[0])
 
     return order
-
-
-def estimate_triangular_matrices_Ti(X):
-    """
-    Estimate the strictly lower-triangular matrices T^i for each of m views,
-    given data X of shape (m, p, n), assuming variables are ordered so that
-    B^i = T^i (strictly lower-triangular).
-    
-    Uses one-step Feasible GLS (SUR) per row j = 1..p:
-      1. OLS on each view to get residuals.
-      2. Estimate cross-view noise covariance Σ_j.
-      3. Run GLS to get joint estimates for T^i_{j,1:(j-1)}.
-    """
-    m, p, n = X.shape
-    # Initialize list of T^i estimates
-    Ts = [np.zeros((p, p)) for _ in range(m)]
-    
-    for j in range(p):
-        # 1) Collect responses and parent matrices
-        Ys = [X[i, j, :] for i in range(m)]                         # length‐m list of (n,)
-        Xs_par = [X[i, :j, :].T if j > 0 else np.zeros((n, 0))      # each (n, j)
-                  for i in range(m)]
-        
-        # 2) Initial OLS residuals
-        residuals = []
-        for i in range(m):
-            Xpj, yj = Xs_par[i], Ys[i]
-            if j > 0:
-                beta_ols, *_ = np.linalg.lstsq(Xpj, yj, rcond=None)
-                ei = yj - Xpj.dot(beta_ols)
-            else:
-                beta_ols = np.zeros(0)
-                ei = yj
-            residuals.append(ei)
-        
-        # 3) Estimate Σ_j (m x m)
-        Σ_j = np.zeros((m, m))
-        for a in range(m):
-            for b in range(m):
-                Σ_j[a, b] = residuals[a].dot(residuals[b]) / n
-        
-        # 4) Build big design and response
-        X_big = block_diag(*Xs_par)        # (n*m) x (j*m)
-        Y_big = np.concatenate(Ys, axis=0) # (n*m,)
-        
-        # 5) Compute weight W = inv(Σ_j) ⊗ I_n
-        if np.linalg.matrix_rank(Σ_j) < m:
-            Σ_j = Σ_j + 1e-6 * np.eye(m)
-        Σ_j_inv = np.linalg.inv(Σ_j)
-        W = np.kron(Σ_j_inv, np.eye(n))
-        
-        # 6) Feasible GLS estimate
-        XtW = X_big.T.dot(W)
-        beta_gls = np.linalg.solve(XtW.dot(X_big), XtW.dot(Y_big))
-        
-        # 7) Assign back into each T^i
-        for i in range(m):
-            start = i * j
-            end = start + j
-            Ts[i][j, :j] = beta_gls[start:end]
-    
-    return np.array(Ts)
 
 
 def praline(X, steps=1000, lr=1e-2):

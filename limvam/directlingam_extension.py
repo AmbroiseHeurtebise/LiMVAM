@@ -1,4 +1,5 @@
 import numpy as np
+from .utils import estimate_triangular_matrices_Ti
 
 
 def compute_residuals_with_univariate_OLS(x, y):
@@ -31,30 +32,68 @@ def find_direction(x, y):
     Compare x → y and y → x using residual–predictor correlation.
     Lower score indicates lower correlation between residuals and predictor.
     x, y: arrays of shape (m, n)
-    Returns (score_x_to_y, score_y_to_x)
+    Returns both scores and both residuals of shape (m, n)
     """
     r_y_on_x = compute_residuals_with_univariate_OLS(x, y)
     r_x_on_y = compute_residuals_with_univariate_OLS(y, x)
     score_x_to_y = correlation_squared(x, r_y_on_x)
     score_y_to_x = correlation_squared(y, r_x_on_y)
-    return score_x_to_y, score_y_to_x
+    return score_x_to_y, score_y_to_x, r_y_on_x, r_x_on_y
 
 
 def find_parent_variable(X):
     """
-    Identify the root variable (with no parents).
+    Identify the root variable (with no parents) and get the residuals
+    when regressing all the other variables on the root variable.
     X: array of shape (m, p, n) for m views, p variables, n samples
-    Returns index of root variable
+    Returns index of root variable and residuals of shape (m, p-1, n)
     """
     m, p, n = X.shape
     X_centered = X - X.mean(axis=-1, keepdims=True)
 
     scores = np.zeros((p, p))
+    R = np.zeros((p, p, m, n))
 
     for i in range(p):
         for j in range(i + 1, p):
-            score_ij, score_ji = find_direction(X_centered[:, i], X_centered[:, j])
+            score_ij, score_ji, r_j_on_i, r_i_on_j = find_direction(X_centered[:, i], X_centered[:, j])
             scores[i, j] = score_ij
             scores[j, i] = score_ji
+            R[i, j] = r_j_on_i
+            R[j, i] = r_i_on_j
 
-    return np.argmin(np.sum(scores, axis=1))
+    parent_id = np.argmin(np.sum(scores, axis=1))
+    r_all_on_parent = R[parent_id].swapaxes(0, 1)  # shape (m, p, n)
+    r_all_on_parent = np.delete(r_all_on_parent, parent_id, axis=1)  # shape (m, p-1, n)
+    
+    return parent_id, r_all_on_parent
+
+
+def estimate_causal_order(X):
+    """
+    Identify the entire ordering by estimating the root variable, 
+    removing its effect on the other variables, and iterating this procedure.
+    X: array of shape (m, p, n) for m views, p variables, n samples
+    Returns entire ordering
+    """
+    m, p, n = X.shape
+    X_current = X.copy()
+    
+    order = []
+    remaining_indices = np.arange(p)
+    while len(order) < p - 1:
+        parent, X_current = find_parent_variable(X_current)
+        order.append(remaining_indices[parent])
+        remaining_indices = np.delete(remaining_indices, parent)
+    order.append(remaining_indices[0])
+
+    return order
+
+
+def directlingam_extension(X):
+    order = estimate_causal_order(X)
+    P = np.eye(X.shape[1])[order]
+    X_ordered = X[:, order]
+    T = estimate_triangular_matrices_Ti(X_ordered)
+    B = P.T @ T @ P
+    return B, T, P

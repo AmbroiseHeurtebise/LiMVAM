@@ -26,7 +26,7 @@ shared_causal_ordering = True
 use_scale_D = True
 
 # varying parameters
-nb_seeds = 20
+nb_seeds = 200
 random_state_list = np.arange(nb_seeds)
 algo_list = [
     "shica_j", "shica_ml", "multi_group_direct_lingam", "lingam", "pairwise", "direct_limvam"]

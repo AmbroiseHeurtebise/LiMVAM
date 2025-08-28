@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import seaborn as sns
@@ -18,11 +19,12 @@ plt.rcParams.update(rc)
 
 # parameters 
 nb_seeds = 200
+median_or_mean = "mean"
 
 # read dataframe
-simulation_dir = Path("/storage/store2/work/aheurteb/LiMVAM/simulation_studies")
+simulation_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies")
 results_dir = simulation_dir / "results/results_execution_time"
-save_name = f"DataFrame_with_{nb_seeds}_seeds_time_and_scale"
+save_name = f"DataFrame_with_{nb_seeds}_seeds_new_methods"
 save_path = results_dir / save_name
 df = pd.read_csv(save_path)
 
@@ -30,17 +32,19 @@ df = pd.read_csv(save_path)
 palette_sns = sns.color_palette()
 palette = {
     'pairwise': palette_sns[0],
-    'shica_ml': palette_sns[1],
-    'shica_j': palette_sns[2],
-    'lingam': palette_sns[3],
-    'multi_group_direct_lingam': palette_sns[4],
+    'direct_limvam': palette_sns[1],
+    'shica_ml': palette_sns[2],
+    'shica_j': palette_sns[3],
+    'lingam': palette_sns[4],
+    'multi_group_direct_lingam': palette_sns[5],
 }
 marker_styles = {
     'pairwise': 'o',
-    'shica_ml': 'X',
-    'shica_j': 's',
-    'lingam': 'P',
-    'multi_group_direct_lingam': 'D',
+    'direct_limvam': 's',
+    'shica_ml': 'P',
+    'shica_j': 'X',
+    'lingam': 'D',
+    'multi_group_direct_lingam': '*',
 }
 
 # Create the plot
@@ -57,36 +61,52 @@ for method, group_df in df.groupby("ica_algo"):
         label=None
     )
     
-    # median
-    x_median = group_df["error_B"].median()
-    y_median = group_df["execution_time"].median()
-    
-    # error bars
-    x_low = group_df["error_B"].quantile(0.16)
-    x_high = group_df["error_B"].quantile(0.84)
-    y_low = group_df["execution_time"].quantile(0.16)
-    y_high = group_df["execution_time"].quantile(0.84)
-    xerr = [[x_median - x_low], [x_high - x_median]]
-    yerr = [[y_median - y_low], [y_high - y_median]]
-    
+    if median_or_mean == "median":
+        # median
+        x_marker = group_df["error_B"].median()
+        y_marker = group_df["execution_time"].median()
+        # error bars
+        x_low = group_df["error_B"].quantile(0.16)
+        x_high = group_df["error_B"].quantile(0.84)
+        y_low = group_df["execution_time"].quantile(0.16)
+        y_high = group_df["execution_time"].quantile(0.84)
+        xerr = [[x_marker - x_low], [x_high - x_marker]]
+        yerr = [[y_marker - y_low], [y_high - y_marker]]
+    elif median_or_mean == "mean":
+        # mean
+        log_x = np.log(group_df["error_B"])
+        log_y = np.log(group_df["execution_time"])
+        x_marker = np.exp(log_x.mean())
+        y_marker = np.exp(log_y.mean())
+        # quantiles
+        x_low = np.exp(log_x.quantile(0.16))
+        x_high = np.exp(log_x.quantile(0.84))
+        xerr = [[x_marker - x_low], [x_high - x_marker]]
+        y_low = np.exp(log_y.quantile(0.16))
+        y_high = np.exp(log_y.quantile(0.84))
+        yerr = [[y_marker - y_low], [y_high - y_marker]]
+        
     # markersize
-    if method == "shica_j":
+    if method == "direct_limvam":
         markersize = 9
-    elif method == "multi_group_direct_lingam":
+    elif method == "lingam":
         markersize = 8
+    elif method == "multi_group_direct_lingam":
+        markersize = 14
     else:
         markersize = 10
 
     # markers and error bars
     ax.errorbar(
-        x_median,
-        y_median,
+        x_marker,
+        y_marker,
         xerr=xerr,
         yerr=yerr,
         fmt=marker_styles.get(method),
         markersize=markersize,
         color=palette.get(method, "gray"),
         capsize=5,
+        capthick=2,
         elinewidth=2,
         markerfacecolor=palette.get(method, "gray"),
         markeredgecolor='white'
@@ -96,16 +116,19 @@ for method, group_df in df.groupby("ica_algo"):
 legend_styles = [
     Line2D([0], [0], marker='o', color='w',
            markerfacecolor=palette_sns[0], markeredgecolor='white', markersize=10),
-    Line2D([0], [0], marker='X', color='w',
-           markerfacecolor=palette_sns[1], markeredgecolor='white', markersize=10),
     Line2D([0], [0], marker='s', color='w',
-           markerfacecolor=palette_sns[2], markeredgecolor='white', markersize=9),
+           markerfacecolor=palette_sns[1], markeredgecolor='white', markersize=9),
     Line2D([0], [0], marker='P', color='w',
+           markerfacecolor=palette_sns[2], markeredgecolor='white', markersize=10),
+    Line2D([0], [0], marker='X', color='w',
            markerfacecolor=palette_sns[3], markeredgecolor='white', markersize=10),
     Line2D([0], [0], marker='D', color='w',
            markerfacecolor=palette_sns[4], markeredgecolor='white', markersize=8),
+    Line2D([0], [0], marker='*', color='w',
+           markerfacecolor=palette_sns[5], markeredgecolor='white', markersize=14),
 ]
-labels = ['PRaLiNE', 'MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
+labels = [
+    'LR-DirectLiMVAM', 'CC-DirectLiMVAM', 'ICSL-ML', 'ICSL-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
 fig.legend(
     legend_styles, labels, bbox_to_anchor=(0.5, 1.12), loc="center",
     ncol=2, borderaxespad=0., fontsize=fontsize

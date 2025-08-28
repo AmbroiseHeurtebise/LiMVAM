@@ -6,6 +6,7 @@ import lingam
 from limvam.micado import micado
 from limvam.praline import praline
 from limvam.caramel import caramel
+from limvam.directlingam_extension import directlingam_extension
 import warnings
 from sklearn.exceptions import ConvergenceWarning
 
@@ -218,6 +219,12 @@ def run_experiment(
     elif ica_algo == "pairwise":
         start = time()
         B_estimates, T_estimates, P_estimate = praline(X, steps=1000, lr=1e-2)
+        execution_time = time() - start
+        # reconstruct what would be unmixing matrices W
+        W_estimates = np.eye(p) - B_estimates
+    elif ica_algo == "direct_limvam":
+        start = time()
+        B_estimates, T_estimates, P_estimate = directlingam_extension(X)
         execution_time = time() - start
         # reconstruct what would be unmixing matrices W
         W_estimates = np.eye(p) - B_estimates

@@ -53,30 +53,39 @@ def profile_log_likelihood(b, x, y):
     return -(jnp.linalg.slogdet(S_x)[1] + jnp.linalg.slogdet(S_e)[1])
 
 
-def compute_ratio_for_two_variables(x, y, steps=1000, lr=1e-2):
+def compute_ratio_for_two_variables(x, y, steps=1000, lr=1e-2, method_for_b="LS_regression"):
     m, _ = x.shape
 
-    b_init = jnp.zeros(m)
-    b_hat = optimize_b(x, y, b_init, steps=steps, lr=lr)
-    b_hat_reverse = optimize_b(y, x, b_init, steps=steps, lr=lr)
+    if method_for_b == "MLE":
+        b_init = jnp.zeros(m)
+        b_hat = optimize_b(x, y, b_init, steps=steps, lr=lr)
+        b_hat_reverse = optimize_b(y, x, b_init, steps=steps, lr=lr)
+    elif method_for_b == "LS_regression":
+        b_hat = np.array([np.corrcoef(x[i], y[i])[0, 1] for i in range(m)])
+        b_hat_reverse = b_hat
     
     l1 = profile_log_likelihood(b_hat, x, y)
     l2 = profile_log_likelihood(b_hat_reverse, y, x)
     
-    return float(l1 - l2), b_hat
+    return float(l1 - l2), b_hat, b_hat_reverse
 
 
-def find_parent_variable(X, steps=1000, lr=1e-2):
+def find_parent_variable(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
     m, p_current, _ = X.shape
     
-    # Compute log-ratios for each pair of variables
+    # Initialize score matrix and coefficients
     R = np.zeros((p_current, p_current))
     B = np.zeros((m, p_current, p_current))
-    indices = [(i, j) for i in range(p_current) for j in range(p_current) if i != j]
+    
+    # Compute log-ratios for each pair of variables
+    indices = [(i, j) for i in range(p_current) for j in range(p_current) if i < j]
     for (i, j) in indices:
-        ratio, b_hat = compute_ratio_for_two_variables(X[:, i], X[:, j], steps=steps, lr=lr)
+        ratio, b_hat, b_hat_reverse = compute_ratio_for_two_variables(
+            X[:, i], X[:, j], steps=steps, lr=lr, method_for_b=method_for_b)
         R[i, j] = ratio
+        R[j, i] = -ratio
         B[:, i, j] = b_hat
+        B[:, j, i] = b_hat_reverse
     
     # Penalize negative scores
     scores = np.sum(np.minimum(0, R) ** 2, axis=1)
@@ -92,14 +101,15 @@ def find_parent_variable(X, steps=1000, lr=1e-2):
     return parent, X
 
 
-def estimate_causal_order(X, steps=1000, lr=1e-2):
+def estimate_causal_order(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
     p = X.shape[1]
     X_current = X.copy()
     
     order = []
     remaining_indices = np.arange(p)
     while len(order) < p - 1:
-        parent, X_current = find_parent_variable(X_current, steps=steps, lr=lr)
+        parent, X_current = find_parent_variable(
+            X_current, steps=steps, lr=lr, method_for_b=method_for_b)
         X_current = np.delete(X_current, parent, axis=1)
         order.append(remaining_indices[parent])
         remaining_indices = np.delete(remaining_indices, parent)
@@ -108,8 +118,8 @@ def estimate_causal_order(X, steps=1000, lr=1e-2):
     return order
 
 
-def praline(X, steps=1000, lr=1e-2):
-    order = estimate_causal_order(X, steps=steps, lr=lr)
+def praline(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
+    order = estimate_causal_order(X, steps=steps, lr=lr, method_for_b=method_for_b)
     P = np.eye(X.shape[1])[order]
     X_ordered = X[:, order]
     T = estimate_triangular_matrices_Ti(X_ordered)

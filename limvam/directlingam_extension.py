@@ -57,12 +57,15 @@ def find_parent_variable(X):
     for i in range(p):
         for j in range(i + 1, p):
             score_ij, score_ji, r_j_on_i, r_i_on_j = find_direction(X_centered[:, i], X_centered[:, j])
-            scores[i, j] = score_ij
-            scores[j, i] = score_ji
+            scores[i, j] = score_ji - score_ij  # XXX
+            scores[j, i] = score_ij - score_ji  # XXX
+            # scores[i, j] = score_ij
+            # scores[j, i] = score_ji
             R[i, j] = r_j_on_i
             R[j, i] = r_i_on_j
 
-    parent_id = np.argmin(np.sum(scores, axis=1))
+    # parent_id = np.argmin(np.sum(scores, axis=1))  # XXX
+    parent_id = np.argmin(np.sum(np.minimum(0, scores) ** 2, axis=1))  # XXX
     r_all_on_parent = R[parent_id].swapaxes(0, 1)  # shape (m, p, n)
     r_all_on_parent = np.delete(r_all_on_parent, parent_id, axis=1)  # shape (m, p-1, n)
     

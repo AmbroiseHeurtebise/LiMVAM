@@ -13,7 +13,7 @@ rc = {
     "xtick.labelsize": fontsize,
     "ytick.labelsize": fontsize,
     "font.family": "serif",
-    # "font.serif": ["Times New Roman", "Nimbus Roman No9 L", "DejaVu Serif"],
+    "font.serif": ["Times"],
 }
 sns.set(style="white")
 plt.rcParams.update(rc)
@@ -23,7 +23,8 @@ nb_seeds = 200
 median_or_mean = "mean"
 
 # read dataframe
-simulation_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies")
+# simulation_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies")
+simulation_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies")
 results_dir = simulation_dir / "results/results_execution_time"
 save_name = f"DataFrame_with_{nb_seeds}_seeds_new_methods_no_shared_disturbances_gaussian"
 save_path = results_dir / save_name
@@ -47,6 +48,14 @@ marker_styles = {
     'lingam': 'D',
     'multi_group_direct_lingam': '*',
 }
+marker_sizes = {
+    'pairwise': 40,
+    'direct_limvam': 36,
+    'shica_ml': 40,
+    'shica_j': 40,
+    'lingam': 32,
+    'multi_group_direct_lingam': 56,
+}
 
 # Create the plot
 fig, ax = plt.subplots(figsize=(6, 3.2))
@@ -59,7 +68,9 @@ for method, group_df in df.groupby("ica_algo"):
         y="execution_time",
         color=palette.get(method, "gray"),
         alpha=0.2,
-        label=None
+        label=None,
+        marker=marker_styles.get(method, "o"),
+        s=marker_sizes.get(method, 40),
     )
     
     if median_or_mean == "median":
@@ -134,8 +145,10 @@ legend_styles = [
     Line2D([0], [0], marker='*', color='w',
            markerfacecolor=palette_sns[5], markeredgecolor='white', markersize=14),
 ]
+# labels = [
+#     'LR-DirectLiMVAM', 'CC-DirectLiMVAM', 'ICSL-ML', 'ICSL-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
 labels = [
-    'LR-DirectLiMVAM', 'CC-DirectLiMVAM', 'ICSL-ML', 'ICSL-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
+    'PairwiseLiMVAM', 'DirectLiMVAM', 'ICA-LiMVAM-ML', 'ICA-LiMVAM-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
 fig.legend(
     legend_styles, labels, bbox_to_anchor=(0.5, 1.12), loc="center",
     ncol=2, borderaxespad=0., fontsize=fontsize
@@ -150,11 +163,12 @@ ax.set_ylim([10**(-0.9), 10**2.2])
 plt.xlabel(r"Error on $B^i$", fontsize=fontsize, family="serif")
 plt.ylabel("Fitting time (in s)", fontsize=fontsize, family="serif")
 ax.tick_params(which='major', bottom=True, left=True, length=4, width=0.8, color='black')
-ax.tick_params(which='minor', bottom=True, left=True, length=2.2, width=0.8, color='black')
+# ax.tick_params(which='minor', bottom=True, left=True, length=2.2, width=0.8, color='black')
+ax.grid(linewidth=0.5, alpha=0.5)
 plt.tight_layout()
 
 # save figure
 figures_dir = simulation_dir / "figures"
 figures_dir.mkdir(parents=True, exist_ok=True)
 plt.savefig(figures_dir / f"simulation_execution_time.pdf", bbox_inches="tight")
-plt.show()
+# plt.show()

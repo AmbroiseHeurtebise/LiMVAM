@@ -24,7 +24,7 @@ metric = "error_B"  # or "error_T", "error_P_exact", "error_P_spearmanr", "amari
 
 # read dataframe
 # results_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/results/results_noise_diversity/"
-results_dir = "/storage/store2/work/aheurteb/LiMVAM/simulation_studies/results/results_noise_diversity/"
+results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_noise_diversity/"
 save_name = f"DataFrame_with_{nb_seeds}_seeds_time_and_scale"
 save_path = results_dir + save_name
 df = pd.read_csv(save_path)
@@ -42,37 +42,65 @@ elif metric == "amari_distance":
     metric_name = "Amari distance"
 
 # labels, dashes and curves order
-labels = ['PRaLiNE', 'MICaDo-ML', 'MICaDo-J']
-dashes = ['', '', '']
+# labels = ['PRaLiNE', 'MICaDo-ML', 'MICaDo-J']
+labels = ['PairwiseLiMVAM', 'ICA-LiMVAM-ML', 'ICA-LiMVAM-J']
+dashes = ['', (2, 2), (2, 2)]
 hue_order = ["pairwise", "shica_ml", "shica_j"]
+marker_styles = {
+    'pairwise': 'o',
+    'shica_ml': 'P',
+    'shica_j': 'X',
+}
+marker_sizes = {
+    'pairwise': 5,
+    'shica_ml': 5,
+    'shica_j': 5,
+}
+palette = sns.color_palette()
+colors = {
+    'pairwise': palette[0],
+    'shica_ml': palette[2],
+    'shica_j': palette[3],
+}
 
 # plot
 fig, ax = plt.subplots(figsize=(6, 2.7))
-sns.lineplot(
-    data=df, x="nb_equal_variances", y=metric, linewidth=2.5, hue="ica_algo", estimator=np.median,
-    errorbar=('ci', 95), hue_order=hue_order, style_order=hue_order, style="ica_algo",
-    dashes=dashes, markers=True)
+
+for method in hue_order:
+    data = df[df["ica_algo"] == method]
+    sns.lineplot(
+        data=data, x="nb_equal_variances", y=metric, linewidth=2.5,
+        estimator=np.median, errorbar=('ci', 95),
+        color=colors[method],
+        dashes=dashes[hue_order.index(method)],
+        marker=marker_styles[method],
+        markersize=marker_sizes[method],
+        label=method
+    )
+# sns.lineplot(
+#     data=df, x="nb_equal_variances", y=metric, linewidth=2.5, hue="ica_algo", estimator=np.median,
+#     errorbar=('ci', 95), hue_order=hue_order, style_order=hue_order, style="ica_algo",
+#     dashes=dashes, markers=True)
 ax.set_yscale("log")
 xlabel = r"Number of views $i$ s.t. $\frac{\Sigma^i_{jj}}{(D^i_{jj})^2} = \frac{\Sigma^i_{j'j'}}{(D^i_{j'j'})^2}$"
 ax.set_xlabel(xlabel, fontsize=fontsize)
 ax.xaxis.set_label_coords(0.5, -0.17)
 ax.set_ylabel(metric_name, fontsize=fontsize)
 ax.yaxis.set_label_coords(-0.155, 0.5)
-ax.grid(which='both', linewidth=0.5, alpha=0.5)
+ax.grid(which='major', linewidth=0.5, alpha=0.5)
 ax.get_legend().remove()
 
 # legend
-palette = sns.color_palette()
 legend_styles = [
     Line2D([0], [0], color=palette[0], linewidth=2.5, linestyle='-', marker='o', 
            markeredgecolor="white", markersize=6),
-    Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='-', marker='X', 
-           markeredgecolor="white", markersize=7),
-    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='-', marker='s', 
+    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle=(0, (2, 2)), marker='P', 
+           markeredgecolor="white", markersize=6),
+    Line2D([0], [0], color=palette[3], linewidth=2.5, linestyle=(0, (2, 2)), marker='X', 
            markeredgecolor="white", markersize=6),
 ]
 fig.legend(
-    legend_styles, labels, bbox_to_anchor=(0.5, 1.03), loc="center",
+    legend_styles, labels, bbox_to_anchor=(0.45, 1.03), loc="center",
     ncol=2, borderaxespad=0., fontsize=fontsize
 )
 

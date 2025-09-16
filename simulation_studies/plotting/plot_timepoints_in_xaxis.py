@@ -32,16 +32,16 @@ else:
     # error_names = [r"Error on $B^i$", r"Error on $T^i$", "Spearman's rank\ncorrelation on" + r" $P^i$"]
 titles = ["Gaussian", "Non-Gaussian", "Half-G / Half-NG"]
 estimator = "mean"
-labels = ['PRaLiNE', 'MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
+labels = ['LR-DirectLiMVAM', 'CC-DirectLiMVAM', 'ICSL-ML', 'ICSL-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
 
 # read dataframe
 # results_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/results/results_timepoints_in_xaxis/"
-results_dir = "/storage/store2/work/aheurteb/LiMVAM/simulation_studies/results/results_timepoints_in_xaxis/"
+results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_timepoints_in_xaxis/"
 if shared_permutation:
     parent_dir = "shared_P"
 else:
     parent_dir = "multiple_Pi"
-save_name = f"/DataFrame_with_{nb_seeds}_seeds_time_and_scale_more_steps"
+save_name = f"/DataFrame_with_{nb_seeds}_seeds_total"
 save_path = results_dir + parent_dir + save_name
 df = pd.read_csv(save_path)
 
@@ -49,7 +49,7 @@ df = pd.read_csv(save_path)
 filtered_df = df[(df["ica_algo"] != "multiviewica") & (df["ica_algo"] != "mv_notears")]
 
 # change the curves order
-hue_order = ["pairwise", "shica_ml", "shica_j", "lingam", "multi_group_direct_lingam"]
+hue_order = ["pairwise", "direct_limvam", "shica_ml", "shica_j", "lingam", "multi_group_direct_lingam"]
 
 # subplots
 fig, axes = plt.subplots(2, 3, figsize=(12, 4.5), sharex="col", sharey="row")
@@ -60,7 +60,7 @@ for i, ax in enumerate(axes.flat):
     # error; one for each of the 3 rows
     y = errors[i // 3]
     # subplot
-    dashes = ['', '', '', (2, 2), (2, 2)]
+    dashes = ['', (5, 5), (2, 2), (2, 2), (2, 2), (2, 2)]
     if i // 3 != 2 and estimator == "median":
         sns.lineplot(
             data=data, x="n", y=y, linewidth=2.5, hue="ica_algo", estimator=np.mean,
@@ -98,11 +98,12 @@ plt.subplots_adjust(hspace=0.15)
 # legend
 palette = sns.color_palette()
 legend_styles = [
-    Line2D([0], [0], color=palette[0], linewidth=2.5, linestyle='-'),
-    Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='-'),
-    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='-'),
-    Line2D([0], [0], color=palette[3], linewidth=2.5, linestyle='--'),
-    Line2D([0], [0], color=palette[4], linewidth=2.5, linestyle='--'),
+    Line2D([0], [0], color=palette[0], linewidth=2.5, linestyle=(3, (4, 3))),
+    Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle=(0, (4, 4))),
+    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle=(0, (2, 2))),
+    Line2D([0], [0], color=palette[3], linewidth=2.5, linestyle=(0, (2, 2))),
+    Line2D([0], [0], color=palette[4], linewidth=2.5, linestyle=(0, (2, 2))),
+    Line2D([0], [0], color=palette[5], linewidth=2.5, linestyle=(0, (2, 2))),
 ]
 fig.legend(
     legend_styles, labels, bbox_to_anchor=(0.5, 1.05), loc="center",
@@ -111,7 +112,7 @@ fig.legend(
 
 # save figure
 # figures_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/figures")
-figures_dir = Path("/storage/store2/work/aheurteb/LiMVAM/simulation_studies/figures")
+figures_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies/figures")
 figures_dir.mkdir(parents=True, exist_ok=True)
 plt.savefig(figures_dir / f"simulation_{parent_dir}.pdf", bbox_inches="tight")
 plt.show()

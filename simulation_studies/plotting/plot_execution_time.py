@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 # matplotlib and seaborn style
-fontsize = 15
+fontsize = 18
 rc = {
     "font.size": fontsize,
     "xtick.labelsize": fontsize,
@@ -149,9 +149,22 @@ legend_styles = [
 #     'LR-DirectLiMVAM', 'CC-DirectLiMVAM', 'ICSL-ML', 'ICSL-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
 labels = [
     'PairwiseLiMVAM', 'DirectLiMVAM', 'ICA-LiMVAM-ML', 'ICA-LiMVAM-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
+# fig.legend(
+#     legend_styles, labels, bbox_to_anchor=(0.5, 1.15), loc="center",
+#     ncol=2, borderaxespad=0., fontsize=fontsize
+# )
+
 fig.legend(
-    legend_styles, labels, bbox_to_anchor=(0.5, 1.12), loc="center",
-    ncol=2, borderaxespad=0., fontsize=fontsize
+    legend_styles, labels,
+    bbox_to_anchor=(0.5, 1.15), loc="center", ncol=2, fontsize=fontsize,
+    # spacing tweaks:
+    handletextpad=0.5,   # marker <-> text
+    columnspacing=0.8,   # space between columns
+    handlelength=0.6,    # shrink handle length
+    # labelspacing=0.2,    # vertical space between rows
+    borderpad=0.2,       # padding inside legend box
+    borderaxespad=0.0,   # space between legend and axes (you already set this)
+    # frameon=False
 )
 
 plt.xscale("log")

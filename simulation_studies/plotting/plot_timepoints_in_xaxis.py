@@ -3,18 +3,20 @@ import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib.ticker import LogLocator
 import seaborn as sns
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning, module="seaborn")
 
 
 # matplotlib style
-fontsize = 15
+fontsize = 20
 rc = {
     "font.size": fontsize,
     "xtick.labelsize": fontsize,
     "ytick.labelsize": fontsize,
     "font.family": "serif",
+    "font.serif": ["Times"],
 }
 plt.rcParams.update(rc)
 
@@ -32,16 +34,18 @@ else:
     # error_names = [r"Error on $B^i$", r"Error on $T^i$", "Spearman's rank\ncorrelation on" + r" $P^i$"]
 titles = ["Gaussian", "Non-Gaussian", "Half-G / Half-NG"]
 estimator = "mean"
-labels = ['LR-DirectLiMVAM', 'CC-DirectLiMVAM', 'ICSL-ML', 'ICSL-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
+# labels = ['LR-DirectLiMVAM', 'CC-DirectLiMVAM', 'ICSL-ML', 'ICSL-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
+labels = [
+    'PairwiseLiMVAM', 'DirectLiMVAM', 'ICA-LiMVAM-ML', 'ICA-LiMVAM-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
 
 # read dataframe
-# results_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/results/results_timepoints_in_xaxis/"
-results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_timepoints_in_xaxis/"
+results_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/results/results_timepoints_in_xaxis/"
+# results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_timepoints_in_xaxis/"
 if shared_permutation:
     parent_dir = "shared_P"
 else:
     parent_dir = "multiple_Pi"
-save_name = f"/DataFrame_with_{nb_seeds}_seeds_total"
+save_name = f"/DataFrame_with_{nb_seeds}_seeds"
 save_path = results_dir + parent_dir + save_name
 df = pd.read_csv(save_path)
 
@@ -76,6 +80,10 @@ for i, ax in enumerate(axes.flat):
     ax.set_xscale("log")
     if i // 3 != 1:
         ax.set_yscale("log")
+        ax.yaxis.set_major_locator(LogLocator(base=10.0, subs=None, numticks=10))
+        ax.set_yticks([1e-1, 1e-3])
+    if i // 3 == 1:
+        ax.set_yticks([1, 0.5, 0])
     # correct ylim in first and second rows
     if i == 0:
         ymin, ymax = ax.get_ylim()
@@ -83,15 +91,19 @@ for i, ax in enumerate(axes.flat):
     # ylabel
     ax.set_xlabel("")
     ax.set_ylabel("")
-    if i % 3 == 0:
-        ax.set_ylabel(error_names[i // 3])
+    if i == 0:
+        ylabel1 = ax.set_ylabel(error_names[i // 3])
+        ylabel1.set_position((0, 0.55))
+    if i == 3:
+        ylabel2 = ax.set_ylabel(error_names[i // 3])
+        ylabel2.set_position((0, 0.4))
     # title, grid, and legend
     if i // 3 == 0:
         ax.set_title(titles[i], fontsize=fontsize)
     ax.grid(which='both', linewidth=0.5, alpha=0.5)
     ax.get_legend().remove()
 label = fig.supxlabel("Number of samples", fontsize=fontsize)
-label.set_position((0.5, 0.055))
+label.set_position((0.5, 0.1))
 plt.gcf().align_labels()
 plt.tight_layout()
 plt.subplots_adjust(hspace=0.15)
@@ -111,8 +123,8 @@ fig.legend(
 )
 
 # save figure
-# figures_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/figures")
-figures_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies/figures")
+figures_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/figures")
+# figures_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies/figures")
 figures_dir.mkdir(parents=True, exist_ok=True)
 plt.savefig(figures_dir / f"simulation_{parent_dir}.pdf", bbox_inches="tight")
-plt.show()
+# plt.show()

@@ -8,7 +8,7 @@ from limvam.praline import praline
 
 
 # Limit the number of jobs
-N_JOBS = 4
+N_JOBS = 10
 os.environ["OMP_NUM_THREADS"] = str(N_JOBS)
 os.environ["MKL_NUM_THREADS"] = str(N_JOBS)
 os.environ["NUMEXPR_NUM_THREADS"] = str(N_JOBS)
@@ -25,12 +25,13 @@ n_labels = 38
 subset = False
 group = False
 ica_algo = "pairwise"
+method_for_b = "LS_regression"
 random_state = 42
 steps = 1000  # for PRaLiNE
 lr = 1e-2  # for PRaLiNE
 
 # Load data
-expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/real_data_experiments")
+expes_dir = Path("/storage/store4/work/aheurteb/LiMVAM/real_data_experiments")
 load_dir = expes_dir / f"2_data_envelopes/{parcellation}_{n_subjects}_subjects"
 
 X_loaded = np.load(load_dir / f"X.npz")
@@ -107,7 +108,7 @@ if ica_algo == "shica_ml":
     execution_time = time() - start
 elif ica_algo == "pairwise":
     start = time()
-    B, T, P = praline(X, steps=steps, lr=lr)
+    B, T, P = praline(X, steps=steps, lr=lr, method_for_b=method_for_b)
     execution_time = time() - start
 
 print(f"The method took {execution_time:.2f} s.")
@@ -119,7 +120,7 @@ elif group == 2:
     group_suffix = "_group2"
 else:
     group_suffix = ""
-save_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects_full}_subjects{group_suffix}_{ica_algo}")
+save_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects_full}_subjects{group_suffix}_{ica_algo}_LS")
 save_dir.mkdir(parents=True, exist_ok=True)
 np.save(save_dir / "P.npy", P)
 np.save(save_dir / "T.npy", T)

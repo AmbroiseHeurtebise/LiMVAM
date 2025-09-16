@@ -13,6 +13,7 @@ rc = {
     "xtick.labelsize": fontsize,
     "ytick.labelsize": fontsize,
     "font.family": "serif",
+    # "font.serif": ["Times New Roman", "Nimbus Roman No9 L", "DejaVu Serif"],
 }
 sns.set(style="white")
 plt.rcParams.update(rc)
@@ -24,7 +25,7 @@ median_or_mean = "mean"
 # read dataframe
 simulation_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies")
 results_dir = simulation_dir / "results/results_execution_time"
-save_name = f"DataFrame_with_{nb_seeds}_seeds_new_methods"
+save_name = f"DataFrame_with_{nb_seeds}_seeds_new_methods_no_shared_disturbances_gaussian"
 save_path = results_dir / save_name
 df = pd.read_csv(save_path)
 
@@ -79,12 +80,18 @@ for method, group_df in df.groupby("ica_algo"):
         x_marker = np.exp(log_x.mean())
         y_marker = np.exp(log_y.mean())
         # quantiles
-        x_low = np.exp(log_x.quantile(0.16))
-        x_high = np.exp(log_x.quantile(0.84))
+        x_low = np.exp(log_x.quantile(0.05))
+        x_high = np.exp(log_x.quantile(0.95))
         xerr = [[x_marker - x_low], [x_high - x_marker]]
-        y_low = np.exp(log_y.quantile(0.16))
-        y_high = np.exp(log_y.quantile(0.84))
+        y_low = np.exp(log_y.quantile(0.05))
+        y_high = np.exp(log_y.quantile(0.95))
         yerr = [[y_marker - y_low], [y_high - y_marker]]
+        # # std
+        # x_std = np.std(group_df["error_B"])
+        # xerr = [[x_std], [x_std]]
+        # y_std = np.std(group_df["execution_time"])
+        # yerr = [[y_std], [y_std]]
+        
         
     # markersize
     if method == "direct_limvam":
@@ -136,7 +143,9 @@ fig.legend(
 
 plt.xscale("log")
 plt.yscale("log")
-ax.set_xlim([10**(-4.1), 10**0.1])
+xmin, xmax = ax.get_xlim()
+# ax.set_xlim([10**(-4.1), 10**0.1])
+ax.set_xlim([xmin, 10**3.8])
 ax.set_ylim([10**(-0.9), 10**2.2])
 plt.xlabel(r"Error on $B^i$", fontsize=fontsize, family="serif")
 plt.ylabel("Fitting time (in s)", fontsize=fontsize, family="serif")

@@ -8,7 +8,7 @@ from utils import run_experiment
 
 
 # limit number of jobs
-N_JOBS = 8
+N_JOBS = 20
 os.environ["OMP_NUM_THREADS"] = str(N_JOBS)
 os.environ["MKL_NUM_THREADS"] = str(N_JOBS)
 os.environ["NUMEXPR_NUM_THREADS"] = str(N_JOBS)
@@ -20,15 +20,15 @@ density = "sub_gauss_super"
 beta1 = 1.5
 beta2 = 2.5
 use_scale_D = True
+use_shared_disturbances = False
 
 # varying parameters
 m_list = [3, 5, 8, 12, 16, 20]
 p_list = [3, 6, 9, 12]
-nb_seeds = 20
+nb_seeds = 50
 random_state_list = np.arange(nb_seeds)
 algo_list = [
-    "multiviewica", "shica_j", "shica_ml", "multi_group_direct_lingam", "lingam",
-    "pairwise", "mv_notears"]
+    "shica_j", "shica_ml", "multi_group_direct_lingam", "lingam", "pairwise", "direct_limvam"]
 
 # run experiment
 nb_expes = len(m_list) * len(p_list) * len(random_state_list) * len(algo_list)
@@ -47,6 +47,7 @@ dict_res = Parallel(n_jobs=N_JOBS)(
         ica_algo=ica_algo,
         noise_level=noise_level,
         use_scale_D=use_scale_D,
+        use_shared_disturbances=use_shared_disturbances,
     ) for m, p, random_state, ica_algo
     in product(m_list, p_list, random_state_list, algo_list)
 )
@@ -59,8 +60,8 @@ print(f"The experiment took {execution_time:.2f} s.")
 # save dataframe
 beta1_str = str(beta1).replace('.', '')
 beta2_str = str(beta2).replace('.', '')
-results_dir = "/storage/store2/work/aheurteb/LiMVAM/simulation_studies/results/results_p_in_xaxis/"
-save_name = f"DataFrame_with_{nb_seeds}_seeds_beta_{beta1_str}_{beta2_str}_time_and_scale"
+results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_p_in_xaxis/"
+save_name = f"DataFrame_with_{nb_seeds}_seeds_beta_{beta1_str}_{beta2_str}_no_shared_disturbances"
 save_path = results_dir + save_name
 df.to_csv(save_path, index=False)
 print("\n####################################### End #######################################")

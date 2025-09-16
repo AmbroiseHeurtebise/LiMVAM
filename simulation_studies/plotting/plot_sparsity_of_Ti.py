@@ -23,7 +23,7 @@ nb_seeds = 30
 metric = "error_P_spearmanr"  # or "error_B", "error_P_exact", "amari_distance"
 
 # read dataframe
-results_dir = "/storage/store2/work/aheurteb/LiMVAM/simulation_studies/results/results_sparsity_of_Ti/"
+results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_sparsity_of_Ti/"
 save_name = f"DataFrame_with_{nb_seeds}_seeds_time_and_scale"
 save_path = results_dir + save_name
 df = pd.read_csv(save_path)
@@ -41,28 +41,59 @@ elif metric == "amari_distance":
     metric_name = "Amari distance"
 
 # labels, dashes, curves order and titles
-labels = ['PRaLiNE', 'MICaDo-ML', 'MICaDo-J']
+labels = ['PairwiseLiMVAM', 'ICA-LiMVAM-ML', 'ICA-LiMVAM-J']
+dashes = ['', (2, 2), (2, 2)]
 hue_order = ["pairwise", "shica_ml", "shica_j"]
-
-# Use color palette
-palette_sns = sns.color_palette()
-palette = {
-    'pairwise': palette_sns[0],
-    'shica_ml': palette_sns[1],
-    'shica_j': palette_sns[2],
+marker_styles = {
+    'pairwise': 'o',
+    'shica_ml': 'P',
+    'shica_j': 'X',
 }
+marker_sizes = {
+    'pairwise': 5,
+    'shica_ml': 5,
+    'shica_j': 5,
+}
+palette = sns.color_palette()
+colors = {
+    'pairwise': palette[0],
+    'shica_ml': palette[2],
+    'shica_j': palette[3],
+}
+
+# # Use color palette
+# palette_sns = sns.color_palette()
+# palette = {
+#     'pairwise': palette_sns[0],
+#     'shica_ml': palette_sns[1],
+#     'shica_j': palette_sns[2],
+# }
 
 # subplots
 fig, axes = plt.subplots(1, 2, figsize=(8, 2.8), sharex=True, sharey=True)
 
 # first subplot
 data1 = df[(df["shared_causal_ordering"] == 0) & (df["ica_algo"] != "pairwise")]
-sns.lineplot(
-    data=data1, x="nb_zeros_Ti", y=metric, linewidth=2.5,
-    hue="ica_algo", style="ica_algo", style_order=["shica_ml", "shica_j"],
-    dashes=['', ''], markers={"shica_ml": "X", "shica_j": "s"}, 
-    palette={"shica_ml": palette_sns[1], "shica_j": palette_sns[2]},
-    estimator=np.median, errorbar=('ci', 95), ax=axes[0])
+
+for method in hue_order:
+    data = data1[data1["ica_algo"] == method]
+    sns.lineplot(
+        data=data, x="nb_zeros_Ti", y=metric, linewidth=2.5,
+        estimator=np.median, errorbar=('ci', 95),
+        color=colors[method],
+        dashes=dashes[hue_order.index(method)],
+        marker=marker_styles[method],
+        markersize=marker_sizes[method],
+        label=method,
+        ax=axes[0]
+    )
+
+# sns.lineplot(
+#     data=data1, x="nb_zeros_Ti", y=metric, linewidth=2.5,
+#     hue="ica_algo", style="ica_algo", style_order=["shica_ml", "shica_j"],
+#     dashes=['', ''], markers={"shica_ml": "X", "shica_j": "s"}, 
+#     palette={"shica_ml": palette_sns[1], "shica_j": palette_sns[2]},
+#     estimator=np.median, errorbar=('ci', 95), ax=axes[0])
 axes[0].set_xlabel("")
 ylabel = axes[0].set_ylabel(metric_name)
 axes[0].yaxis.set_label_coords(-0.12, 0.5)
@@ -72,10 +103,24 @@ axes[0].get_legend().remove()
 
 # second subplot
 data2 = df[df["shared_causal_ordering"] == 1]
-sns.lineplot(
-    data=data2, x="nb_zeros_Ti", y=metric, linewidth=2.5, hue="ica_algo", estimator=np.median,
-    errorbar=('ci', 95), ax=axes[1], hue_order=hue_order, style_order=hue_order, style="ica_algo",
-    dashes=['', '', ''], markers=True)
+
+for method in hue_order:
+    data = data2[data2["ica_algo"] == method]
+    sns.lineplot(
+        data=data, x="nb_zeros_Ti", y=metric, linewidth=2.5,
+        estimator=np.median, errorbar=('ci', 95),
+        color=colors[method],
+        dashes=dashes[hue_order.index(method)],
+        marker=marker_styles[method],
+        markersize=marker_sizes[method],
+        label=method,
+        ax=axes[1]
+    )
+
+# sns.lineplot(
+#     data=data2, x="nb_zeros_Ti", y=metric, linewidth=2.5, hue="ica_algo", estimator=np.median,
+#     errorbar=('ci', 95), ax=axes[1], hue_order=hue_order, style_order=hue_order, style="ica_algo",
+#     dashes=['', '', ''], markers=True)
 axes[1].set_xlabel("")
 axes[1].set_title("Shared causal ordering", fontsize=fontsize)
 axes[1].grid(which='both', linewidth=0.5, alpha=0.5)
@@ -96,10 +141,10 @@ palette = sns.color_palette()
 legend_styles = [
     Line2D([0], [0], color=palette[0], linewidth=2.5, linestyle='-', marker='o', 
            markeredgecolor="white", markersize=6),
-    Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='-', marker='X', 
-           markeredgecolor="white", markersize=7),
-    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='-', marker='s', 
-           markeredgecolor="white", markersize=7),
+    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle=(0, (2, 2)), marker='P', 
+           markeredgecolor="white", markersize=6),
+    Line2D([0], [0], color=palette[3], linewidth=2.5, linestyle=(0, (2, 2)), marker='X', 
+           markeredgecolor="white", markersize=6),
 ]
 fig.legend(
     legend_styles, labels, bbox_to_anchor=(0.5, 1.03), loc="center",

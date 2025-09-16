@@ -8,7 +8,7 @@ from utils import run_experiment
 
 
 # limit the number of jobs
-N_JOBS = 4
+N_JOBS = 10
 os.environ["OMP_NUM_THREADS"] = str(N_JOBS)
 os.environ["MKL_NUM_THREADS"] = str(N_JOBS)
 os.environ["NUMEXPR_NUM_THREADS"] = str(N_JOBS)
@@ -24,9 +24,10 @@ nb_gaussian_disturbances_list = [0, 2, 4]
 nb_seeds = 50
 random_state_list = np.arange(nb_seeds)
 n_list = np.logspace(2, 4, 21, dtype=int)
-algo_list = [
-    "multiviewica", "shica_j", "shica_ml", "multi_group_direct_lingam", "lingam",
-    "pairwise", "mv_notears"]
+# algo_list = [
+#     "multiviewica", "shica_j", "shica_ml", "multi_group_direct_lingam", "lingam",
+#     "pairwise", "mv_notears"]
+algo_list = ['direct_limvam']  # XXX
 
 # run experiment
 nb_expes = len(nb_gaussian_disturbances_list) * len(random_state_list) * len(n_list) * len(algo_list)
@@ -53,12 +54,12 @@ execution_time = time() - start
 print(f"The experiment took {execution_time:.2f} s.")
 
 # save dataframe
-results_dir = "/storage/store2/work/aheurteb/LiMVAM/simulation_studies/results/"
+results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/"
 if shared_causal_ordering:
     parent_dir = "results_timepoints_in_xaxis/shared_P/"
 else:
     parent_dir = "results_timepoints_in_xaxis/multiple_Pi/"
-save_name = f"DataFrame_with_{nb_seeds}_seeds_time_and_scale_more_steps"
+save_name = f"DataFrame_with_{nb_seeds}_seeds"
 save_path = results_dir + parent_dir + save_name
 df.to_csv(save_path, index=False)
 print("\n####################################### End #######################################")

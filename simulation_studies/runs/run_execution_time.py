@@ -8,7 +8,7 @@ from utils import run_experiment
 
 
 # limit number of jobs
-N_JOBS = 8
+N_JOBS = 20
 os.environ["OMP_NUM_THREADS"] = str(N_JOBS)
 os.environ["MKL_NUM_THREADS"] = str(N_JOBS)
 os.environ["NUMEXPR_NUM_THREADS"] = str(N_JOBS)
@@ -24,6 +24,8 @@ beta2 = 3
 betas_evenly_spaced = True
 shared_causal_ordering = True
 use_scale_D = True
+use_shared_disturbances = False
+nb_gaussian_disturbances = p
 
 # varying parameters
 nb_seeds = 200
@@ -50,6 +52,8 @@ dict_res = Parallel(n_jobs=N_JOBS)(
         noise_level=noise_level,
         shared_causal_ordering=shared_causal_ordering,
         use_scale_D=use_scale_D,
+        use_shared_disturbances=use_shared_disturbances,
+        nb_gaussian_disturbances=nb_gaussian_disturbances,
     ) for random_state, ica_algo
     in product(random_state_list, algo_list)
 )
@@ -61,7 +65,7 @@ print(f"The experiment took {execution_time:.2f} s.")
 
 # save dataframe
 results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_execution_time/"
-save_name = f"DataFrame_with_{nb_seeds}_seeds_new_methods"
+save_name = f"DataFrame_with_{nb_seeds}_seeds_new_methods_no_shared_disturbances_gaussian"
 save_path = results_dir + save_name
 df.to_csv(save_path, index=False)
 print("\n####################################### End #######################################")

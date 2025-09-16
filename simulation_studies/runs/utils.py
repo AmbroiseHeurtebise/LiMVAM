@@ -1,5 +1,6 @@
 import numpy as np
-from scipy.stats import gennorm, pearsonr
+from numpy.linalg import cholesky
+from scipy.stats import gennorm, pearsonr, multivariate_t
 from time import time
 from picard import amari_distance
 import lingam
@@ -22,6 +23,43 @@ def f(x, alpha):
     return (1 - alpha) * f1(x) + alpha * f2(x)
 
 
+def rmultivariate_powerexp(rng, n, mean, Sigma, beta):
+    """
+    Multivariate generalized Gaussian (power-exponential) with SciPy-like convention:
+      - beta = 2 -> multivariate Gaussian
+      - beta = 1 -> Laplace-like
+      - beta < 2 -> heavier tails; beta > 2 -> lighter tails
+
+    Construction (elliptical):
+      X = mean + A (U * T),  with  A A^T = Sigma
+      U ~ uniform on the unit sphere S^{m-1}
+      Draw S ~ Gamma(shape=m/beta, scale=2), then set T = S**(1/beta)
+
+    Notes:
+      - Sigma acts as a *scatter* matrix. For beta != 2, Cov(X) (if it exists) is a scalar multiple of Sigma.
+      - Returns array of shape (m, n).
+    """
+    if beta <= 0:
+        raise ValueError("beta must be > 0")
+
+    mean = np.asarray(mean)
+    m = mean.size
+    A = cholesky(Sigma)
+
+    # Directions: U ~ uniform on the unit sphere in R^m
+    Z = rng.standard_normal(size=(n, m))
+    norms = np.linalg.norm(Z, axis=1, keepdims=True)
+    U = Z / norms  # each row has unit norm
+
+    # Radii that match SciPy's gennorm convention (beta=2 -> Gaussian)
+    # With our mapping, T^{beta} ~ Gamma(shape=m/beta, scale=2)  => T = S**(1/beta)
+    S = rng.gamma(shape=m / beta, scale=2.0, size=n)
+    T = S ** (1.0 / beta)
+
+    X = mean + (U * T[:, None]) @ A.T
+    return X.T
+
+
 # function that samples data according to our model
 # we use similar parameters as in Fig. 2 of the ShICA paper
 def sample_data(
@@ -40,58 +78,107 @@ def sample_data(
     shared_causal_ordering=True,
     use_scale_D=False,
     non_linearity_alpha=None,
+    use_shared_disturbances=True,
 ):
     rng = np.random.RandomState(random_state)
     
-    # scales
-    if use_scale_D:
-        # D = rng.uniform(low=0.1, high=3, size=(m, p))
-        D = rng.uniform(low=0.5, high=2, size=(m, p))
-    else:
-        D = np.ones((m, p))
-    
-    if density == "gauss_super":
-        # sources
-        S_ng = rng.laplace(size=(p-nb_gaussian_disturbances, n))
-        S_g = rng.normal(size=(nb_gaussian_disturbances, n))
-        S = np.vstack((S_ng, S_g))
-        # noise variances
-        sigmas = np.ones((m, p)) * 1 / 2
-        if nb_gaussian_disturbances != 0:
-            sigmas[:, -nb_gaussian_disturbances:] = rng.uniform(size=(m, nb_gaussian_disturbances))
-            if nb_equal_variances > 0:
-                indices = rng.choice(m, size=nb_equal_variances, replace=False)
-                if use_scale_D:
-                    # hardcode for p=4
-                    new_values = D[:, 3] / D[:, 2] * sigmas[:, 2]
-                    if len(indices) > 0:
-                        for idx in indices:
-                            sigmas[idx, 3] = new_values[idx]
-                else:
-                    sigmas[indices, -nb_gaussian_disturbances:] = sigmas[indices, -nb_gaussian_disturbances][:, np.newaxis]
-    elif density == "sub_gauss_super":
-        # sources
-        if betas_evenly_spaced:
-            betas = np.linspace(beta1, beta2, p)
-            S = np.zeros((p, n))
-            for j in range(p):
-                S[j] = gennorm.rvs(betas[j], size=n, random_state=random_state)
+    if use_shared_disturbances:
+        # scales
+        if use_scale_D:
+            # D = rng.uniform(low=0.1, high=3, size=(m, p))
+            D = rng.uniform(low=0.5, high=2, size=(m, p))
         else:
-            S1 = gennorm.rvs(beta1, size=(p//3, n), random_state=random_state)
-            S2 = gennorm.rvs(2, size=(p-2*(p//3), n), random_state=random_state)  # Gaussian
-            S3 = gennorm.rvs(beta2, size=(p//3, n), random_state=random_state)
-            S = np.vstack((S1, S2, S3))
-        S = S[rng.permutation(p)]
-        # noise variances
-        sigmas = rng.uniform(size=(m, p))
+            D = np.ones((m, p))
+        
+        if density == "gauss_super":
+            # sources
+            S_ng = rng.laplace(size=(p-nb_gaussian_disturbances, n))
+            S_g = rng.normal(size=(nb_gaussian_disturbances, n))
+            S = np.vstack((S_ng, S_g))
+            # noise variances
+            sigmas = np.ones((m, p)) * 1 / 2
+            if nb_gaussian_disturbances != 0:
+                sigmas[:, -nb_gaussian_disturbances:] = rng.uniform(size=(m, nb_gaussian_disturbances))
+                if nb_equal_variances > 0:
+                    indices = rng.choice(m, size=nb_equal_variances, replace=False)
+                    if use_scale_D:
+                        # hardcode for p=4
+                        new_values = D[:, 3] / D[:, 2] * sigmas[:, 2]
+                        if len(indices) > 0:
+                            for idx in indices:
+                                sigmas[idx, 3] = new_values[idx]
+                    else:
+                        sigmas[indices, -nb_gaussian_disturbances:] = sigmas[indices, -nb_gaussian_disturbances][:, np.newaxis]
+        elif density == "sub_gauss_super":
+            # sources
+            if betas_evenly_spaced:
+                betas = np.linspace(beta1, beta2, p)
+                S = np.zeros((p, n))
+                for j in range(p):
+                    S[j] = gennorm.rvs(betas[j], size=n, random_state=random_state)
+            else:
+                S1 = gennorm.rvs(beta1, size=(p//3, n), random_state=random_state)
+                S2 = gennorm.rvs(2, size=(p-2*(p//3), n), random_state=random_state)  # Gaussian
+                S3 = gennorm.rvs(beta2, size=(p//3, n), random_state=random_state)
+                S = np.vstack((S1, S2, S3))
+            S = S[rng.permutation(p)]
+            # noise variances
+            sigmas = rng.uniform(size=(m, p))
+        else:
+            raise ValueError("The parameter 'density' should be either 'gauss_super' or 'sub_gauss_super'")
+
+        # noise
+        N = noise_level * rng.normal(scale=sigmas[:, :, np.newaxis], size=(m, p, n))
+
+        # disturbances
+        E = D[:, :, None] * S + N
     else:
-        raise ValueError("The parameter 'density' should be either 'gauss_super' or 'sub_gauss_super'")
+        # variance of the disturbances
+        M = rng.randn(p, m, m)
+        Sigmas = np.zeros((p, m, m))
+        for j in range(p):
+            Sigmas[j] = M[j] @ M[j].T + m * np.eye(m)
 
-    # noise
-    N = noise_level * rng.normal(scale=sigmas[:, :, np.newaxis], size=(m, p, n))
-
-    # disturbances
-    E = D[:, :, None] * S + N
+        # disturbances
+        E = np.zeros((m, p, n))
+        if density == "gauss_super":
+            if nb_gaussian_disturbances == p:
+                for j in range(p):
+                    E[:, j] = rng.multivariate_normal(
+                        mean=np.zeros(m), cov=Sigmas[j], size=(n,)).T
+            elif nb_gaussian_disturbances == 0:
+                for j in range(p):
+                    E[:, j] = multivariate_t.rvs(
+                        loc=np.zeros(m), shape=Sigmas[j], df=10, size=n, random_state=rng).T
+            else:
+                for j in range(nb_gaussian_disturbances):
+                    E[:, j] = rng.multivariate_normal(
+                        mean=np.zeros(m), cov=Sigmas[j], size=(n,)).T
+                for j in range(nb_gaussian_disturbances, p):
+                    E[:, j] = multivariate_t.rvs(
+                        loc=np.zeros(m), shape=Sigmas[j], df=10, size=n, random_state=rng).T
+                perm = rng.permutation(p)
+                E = E[:, perm, :]
+        elif density == "sub_gauss_super":
+            if betas_evenly_spaced:
+                betas = np.linspace(beta1, beta2, p)
+                for j in range(p):
+                    E[:, j] = rmultivariate_powerexp(
+                        rng, n=n, mean=np.zeros(m), Sigma=Sigmas[j], beta=betas[j])
+            else:
+                for j in range(p//3):
+                    E[:, j] = rmultivariate_powerexp(
+                        rng, n=n, mean=np.zeros(m), Sigma=Sigmas[j], beta=beta1)
+                for j in range(p//3, p-p//3):
+                    E[:, j] = rmultivariate_powerexp(
+                        rng, n=n, mean=np.zeros(m), Sigma=Sigmas[j], beta=2)
+                for j in range(p-p//3, p):
+                    E[:, j] = rmultivariate_powerexp(
+                        rng, n=n, mean=np.zeros(m), Sigma=Sigmas[j], beta=beta2)
+            perm = rng.permutation(p)
+            E = E[:, perm, :]
+        else:
+            raise ValueError("The parameter 'density' should be either 'gauss_super' or 'sub_gauss_super'")
 
     # causal effect matrices T
     T = rng.normal(size=(m, p, p))
@@ -143,8 +230,9 @@ def run_experiment(
     shared_causal_ordering=True,
     use_scale_D=False,
     non_linearity_alpha=None,
+    use_shared_disturbances=True,
 ):
-    if density == "sub_gauss_super":
+    if use_shared_disturbances & (density == "sub_gauss_super"):
         nb_gaussian_disturbances = p - 2 * (p // 3)
     # generate observations X, causal order(s) P, and causal effects B and T
     X, B, T, P, A = sample_data(
@@ -163,6 +251,7 @@ def run_experiment(
         shared_causal_ordering=shared_causal_ordering,
         use_scale_D=use_scale_D,
         non_linearity_alpha=non_linearity_alpha,
+        use_shared_disturbances=use_shared_disturbances,
     )
 
     # apply either our method, Multi Group DirectLiNGAM, or LiNGAM
@@ -302,6 +391,7 @@ def run_experiment(
         "nb_zeros_Ti": nb_zeros_Ti,
         "shared_causal_ordering": shared_causal_ordering,
         "non_linearity_alpha": non_linearity_alpha,
+        "use_shared_disturbances": use_shared_disturbances,
         "random_state": random_state,
         "error_B": error_B,
         "error_B_abs": error_B_abs,

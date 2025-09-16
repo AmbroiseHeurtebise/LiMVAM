@@ -19,7 +19,7 @@ rc = {
 plt.rcParams.update(rc)
 
 # parameters 
-nb_seeds = 20
+nb_seeds = 2
 metric = "error_B"  # or "error_T", "error_P_exact", "error_P_spearmanr", "amari_distance"
 beta1 = 1.5
 beta2 = 2.5
@@ -27,8 +27,8 @@ beta2 = 2.5
 # read dataframe
 beta1_str = str(beta1).replace('.', '')
 beta2_str = str(beta2).replace('.', '')
-results_dir = "/storage/store2/work/aheurteb/LiMVAM/simulation_studies/results/results_p_in_xaxis/"
-save_name = f"DataFrame_with_{nb_seeds}_seeds_beta_{beta1_str}_{beta2_str}_time_and_scale"
+results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_p_in_xaxis/"
+save_name = f"DataFrame_with_{nb_seeds}_seeds_beta_{beta1_str}_{beta2_str}_no_shared_disturbances"
 save_path = results_dir + save_name
 df = pd.read_csv(save_path)
 
@@ -49,22 +49,47 @@ elif metric == "amari_distance":
     metric_name = "Amari distance"
 
 # labels, dashes and curves order
-# labels = ['PairwiseLiMVAM', 'MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
-labels = ['PRaLiNE', 'MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
-dashes = ['', '', '', (2, 2), (2, 2)]
-hue_order = ["pairwise", "shica_ml", "shica_j", "lingam", "multi_group_direct_lingam"]
+labels = [
+    'PairwiseLiMVAM', 'DirectLiMVAM', 'ICA-LiMVAM-ML', 'ICA-LiMVAM-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
+dashes = ['', '', (2, 2), (2, 2), (2, 2), (2, 2)]
+hue_order = ["pairwise", "direct_limvam", "shica_ml", "shica_j", "lingam", "multi_group_direct_lingam"]
+
 # remove MVICA LiNGAM and MV-NOTEARS curves
 filtered_df = df[(df["ica_algo"] != "multiviewica") & (df["ica_algo"] != "mv_notears")]
+
+marker_styles = {
+    'pairwise': 'o',
+    'direct_limvam': 's',
+    'shica_ml': 'P',
+    'shica_j': 'X',
+    'lingam': 'D',
+    'multi_group_direct_lingam': '*',
+}
+marker_sizes = {
+    'pairwise': 5,
+    'direct_limvam': 4.5,
+    'shica_ml': 5,
+    'shica_j': 5,
+    'lingam': 4,
+    'multi_group_direct_lingam': 7,
+}
 
 # subplots
 fig, axes = plt.subplots(2, 3, figsize=(12, 4.8), sharex=True, sharey=True)
 for i, ax in enumerate(axes.flat):
     m = m_list[i]
     data = filtered_df[filtered_df["m"] == m]
-    sns.lineplot(
-        data=data, x="p", y=metric, linewidth=2.5, hue="ica_algo", ax=ax, estimator=np.median,
-        errorbar=('ci', 95), hue_order=hue_order, style_order=hue_order, style="ica_algo",
-        dashes=dashes, markers=True)
+    for method in hue_order:
+        data_m = data[data["ica_algo"] == method]
+        sns.lineplot(
+            data=data_m, x="p", y=metric, ax=ax, linewidth=2.5,
+            estimator=np.median, errorbar=('ci', 95),
+            color=sns.color_palette()[hue_order.index(method)],
+            dashes=dashes[hue_order.index(method)],
+            marker=marker_styles[method],
+            markersize=marker_sizes[method],
+            label=method
+        )
     ax.set_yscale("log")
     ax.set_xlabel("")
     ax.set_ylabel("")
@@ -79,22 +104,32 @@ ax.set_xticks(p_list)
 # if include_multiviewica:
 #     ymin, ymax = ax.get_ylim()
 #     ax.set_ylim(ymin, 1e2)
+ymin, ymax = ax.get_ylim()
+ax.set_ylim(ymin, 1e3)
 plt.tight_layout()
 plt.subplots_adjust(hspace=0.3, wspace=0.1)
 
 # legend
 palette = sns.color_palette()
+# legend_styles = [
+#     Line2D([0], [0], color=palette[0], linewidth=2.5, linestyle='-', marker='o', 
+#            markeredgecolor="white", markersize=6),
+#     Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='-', marker='X', 
+#            markeredgecolor="white", markersize=7),
+#     Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='-', marker='s', 
+#            markeredgecolor="white", markersize=5),
+#     Line2D([0], [0], color=palette[3], linewidth=2.5, linestyle='--', marker='P', 
+#            markeredgecolor="white", markersize=6),
+#     Line2D([0], [0], color=palette[4], linewidth=2.5, linestyle='--', marker='D', 
+#            markeredgecolor="white", markersize=5),
+# ]
 legend_styles = [
-    Line2D([0], [0], color=palette[0], linewidth=2.5, linestyle='-', marker='o', 
-           markeredgecolor="white", markersize=6),
-    Line2D([0], [0], color=palette[1], linewidth=2.5, linestyle='-', marker='X', 
-           markeredgecolor="white", markersize=7),
-    Line2D([0], [0], color=palette[2], linewidth=2.5, linestyle='-', marker='s', 
-           markeredgecolor="white", markersize=5),
-    Line2D([0], [0], color=palette[3], linewidth=2.5, linestyle='--', marker='P', 
-           markeredgecolor="white", markersize=6),
-    Line2D([0], [0], color=palette[4], linewidth=2.5, linestyle='--', marker='D', 
-           markeredgecolor="white", markersize=5),
+    Line2D([0], [0], color=palette[0], linewidth=2.5, marker='o', markersize=6, markeredgecolor="white", linestyle='-'),
+    Line2D([0], [0], color=palette[1], linewidth=2.5, marker='s', markersize=5.5, markeredgecolor="white", linestyle='-'),
+    Line2D([0], [0], color=palette[2], linewidth=2.5, marker='P', markersize=6, markeredgecolor="white", linestyle=(0, (2, 2))),
+    Line2D([0], [0], color=palette[3], linewidth=2.5, marker='X', markersize=6, markeredgecolor="white", linestyle=(0, (2, 2))),
+    Line2D([0], [0], color=palette[4], linewidth=2.5, marker='D', markersize=5, markeredgecolor="white", linestyle=(0, (2, 2))),
+    Line2D([0], [0], color=palette[5], linewidth=2.5, marker='*', markersize=9, markeredgecolor="white", linestyle=(0, (2, 2))),
 ]
 ncol = 3
 fig.legend(
@@ -111,6 +146,6 @@ fig.legend(
 # fig.text(0.5, -0.05, caption, ha='center', va='center', fontsize=fontsize)
 
 # save figure
-figures_dir = Path("/storage/store2/work/aheurteb/LiMVAM/simulation_studies/figures")
+figures_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies/figures")
 plt.savefig(figures_dir / f"simulation_p_in_xaxis.pdf", bbox_inches="tight")
 plt.show()

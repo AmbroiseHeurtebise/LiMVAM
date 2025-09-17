@@ -65,17 +65,52 @@ for i, ax in enumerate(axes.flat):
     y = errors[i // 3]
     # subplot
     dashes = ['', (5, 5), (2, 2), (2, 2), (2, 2), (2, 2)]
-    if i // 3 != 2 and estimator == "median":
-        sns.lineplot(
-            data=data, x="n", y=y, linewidth=2.5, hue="ica_algo", estimator=np.mean,
-            ax=ax, errorbar=lambda x: (np.quantile(x, 0.025), np.quantile(x, 0.975)),
-            hue_order=hue_order, style_order=hue_order, style="ica_algo",
-            dashes=dashes)
+    palette = sns.color_palette(None, n_colors=len(hue_order))
+
+    if i // 3 == 0:
+        # ---- FIRST ROW: compute median + 95% CI in log space and draw bands ----
+        dm = data.copy()
+        dm["_logy"] = np.log10(dm[y])
+
+        for k, method in enumerate(hue_order):
+            dmk = dm[dm["ica_algo"] == method]
+            if dmk.empty:
+                continue
+
+            g = (
+                dmk.groupby("n")["_logy"]
+                   .agg(med="median",
+                        lo=lambda x: np.quantile(x, 0.25),
+                        hi=lambda x: np.quantile(x, 0.75))
+                   .reset_index()
+                   .sort_values("n")
+            )
+
+            x_vals = g["n"].to_numpy()
+            y_med  = 10 ** g["med"].to_numpy()
+            y_lo   = 10 ** g["lo"].to_numpy()
+            y_hi   = 10 ** g["hi"].to_numpy()
+
+            # CI band (like seaborn)
+            ax.fill_between(x_vals, y_lo, y_hi,
+                            color=palette[k], alpha=0.2, linewidth=0)
+
+            # median line
+            ax.plot(
+                x_vals, y_med,
+                color=palette[k], linewidth=2.5,
+                linestyle='-' if dashes[k] == '' else (0, dashes[k]),
+                label=method
+            )
     else:
+        # ---- SECOND ROW: keep seaborn with default (linear y) CI ----
         sns.lineplot(
-            data=data, x="n", y=y, linewidth=2.5, hue="ica_algo", ax=ax, errorbar=('ci', 95),
+            data=data, x="n", y=y, linewidth=2.5, hue="ica_algo", ax=ax,
+            errorbar=('ci', 95),
             hue_order=hue_order, style_order=hue_order, style="ica_algo",
-            dashes=dashes)
+            dashes=dashes, legend=False
+        )
+
     # set axis in logscale, except for the yaxis of the middle row
     ax.set_xscale("log")
     if i // 3 != 1:
@@ -101,7 +136,6 @@ for i, ax in enumerate(axes.flat):
     if i // 3 == 0:
         ax.set_title(titles[i], fontsize=fontsize)
     ax.grid(which='both', linewidth=0.5, alpha=0.5)
-    ax.get_legend().remove()
 label = fig.supxlabel("Number of samples", fontsize=fontsize)
 label.set_position((0.5, 0.1))
 plt.gcf().align_labels()

@@ -9,12 +9,13 @@ warnings.filterwarnings("ignore", category=FutureWarning, module="seaborn")
 
 
 # matplotlib style
-fontsize = 14
+fontsize = 16
 rc = {
     "font.size": fontsize,
     "xtick.labelsize": fontsize,
     "ytick.labelsize": fontsize,
     "font.family": "serif",
+    "font.serif": ["Times"],
 }
 plt.rcParams.update(rc)
 
@@ -23,7 +24,8 @@ nb_seeds = 30
 metric = "error_P_spearmanr"  # or "error_B", "error_P_exact", "amari_distance"
 
 # read dataframe
-results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_sparsity_of_Ti/"
+# results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_sparsity_of_Ti/"
+results_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/results/results_sparsity_of_Ti/"
 save_name = f"DataFrame_with_{nb_seeds}_seeds_time_and_scale"
 save_path = results_dir + save_name
 df = pd.read_csv(save_path)
@@ -164,6 +166,7 @@ fig.legend(
 # fig.text(0.5, -0.2, caption, ha='center', va='center', fontsize=fontsize)
 
 # save figure
-figures_dir = Path("/storage/store2/work/aheurteb/LiMVAM/simulation_studies/figures")
+# figures_dir = Path("/storage/store2/work/aheurteb/LiMVAM/simulation_studies/figures")
+figures_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/figures")
 plt.savefig(figures_dir / f"simulation_sparsity_of_Ti.pdf", bbox_inches="tight")
-plt.show()
+# plt.show()

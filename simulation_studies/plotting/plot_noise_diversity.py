@@ -9,12 +9,13 @@ warnings.filterwarnings("ignore", category=FutureWarning, module="seaborn")
 
 
 # matplotlib style
-fontsize = 15
+fontsize = 19
 rc = {
     "font.size": fontsize,
     "xtick.labelsize": fontsize,
     "ytick.labelsize": fontsize,
     "font.family": "serif",
+    "font.serif": ["Times"],
 }
 plt.rcParams.update(rc)
 
@@ -23,8 +24,8 @@ nb_seeds = 50
 metric = "error_B"  # or "error_T", "error_P_exact", "error_P_spearmanr", "amari_distance"
 
 # read dataframe
-# results_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/results/results_noise_diversity/"
-results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_noise_diversity/"
+results_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/results/results_noise_diversity/"
+# results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_noise_diversity/"
 save_name = f"DataFrame_with_{nb_seeds}_seeds_time_and_scale"
 save_path = results_dir + save_name
 df = pd.read_csv(save_path)
@@ -82,6 +83,7 @@ for method in hue_order:
 #     errorbar=('ci', 95), hue_order=hue_order, style_order=hue_order, style="ica_algo",
 #     dashes=dashes, markers=True)
 ax.set_yscale("log")
+ax.set_xticks(np.arange(6))
 xlabel = r"Number of views $i$ s.t. $\frac{\Sigma^i_{jj}}{(D^i_{jj})^2} = \frac{\Sigma^i_{j'j'}}{(D^i_{j'j'})^2}$"
 ax.set_xlabel(xlabel, fontsize=fontsize)
 ax.xaxis.set_label_coords(0.5, -0.17)
@@ -100,8 +102,15 @@ legend_styles = [
            markeredgecolor="white", markersize=6),
 ]
 fig.legend(
-    legend_styles, labels, bbox_to_anchor=(0.45, 1.03), loc="center",
-    ncol=2, borderaxespad=0., fontsize=fontsize
+    legend_styles, labels, bbox_to_anchor=(0.43, 1.05), loc="center",
+    ncol=2, fontsize=fontsize,
+    handletextpad=0.7,   # marker <-> text
+    columnspacing=0.7,   # space between columns
+    # handlelength=0.6,    # shrink handle length
+    # # labelspacing=0.2,    # vertical space between rows
+    # borderpad=0.2,       # padding inside legend box
+    # borderaxespad=0.0,   # space between legend and axes (you already set this)
+    # # frameon=False
 )
 
 # # caption
@@ -116,7 +125,7 @@ fig.legend(
 # fig.text(0.5, -0.42, caption, ha='center', va='center', fontsize=fontsize)
 
 # save figure
-# figures_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/figures")
-figures_dir = Path("/storage/store2/work/aheurteb/LiMVAM/simulation_studies/figures")
+figures_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/figures")
+# figures_dir = Path("/storage/store2/work/aheurteb/LiMVAM/simulation_studies/figures")
 plt.savefig(figures_dir / f"simulation_noise_diversity.pdf", bbox_inches="tight")
-plt.show()
+# plt.show()

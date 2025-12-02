@@ -12,20 +12,20 @@ rc = {
     "font.size": fontsize,
     "xtick.labelsize": fontsize,
     "ytick.labelsize": fontsize,
-    # "font.family": "serif",
-    # "font.serif": ["Times"],
+    "font.family": "serif",
+    "font.serif": ["Times"],
 }
 sns.set(style="white")
 plt.rcParams.update(rc)
 
 # parameters
-m = 5
-p = 3
-n = 100
-nb_seeds = 10
+m = 6
+p = 4
+n = 500
+nb_seeds = 30
 max_interventions = p*(p-1)//2
 
-labels = ["ICA-LiMVAM", "MSS (KCI)"]
+labels = ["DirectLiMVAM", "MSS (KCI)"]
 
 # read dataframe
 simulation_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies")
@@ -41,7 +41,7 @@ palette = {
     'mss': palette_sns[7],
 }
 
-fig, ax = plt.subplots(figsize=(10, 5))
+fig, ax = plt.subplots(figsize=(5, 2))
 
 sns.lineplot(
     data=df, x="nb_interventions", y="score", hue="method", linewidth=2.5,

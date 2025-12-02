@@ -175,13 +175,13 @@ os.environ["NUMEXPR_NUM_THREADS"] = str(N_JOBS)
 # parameters
 m = 5
 p = 3
-n = 100
+n = 200
 disturbances = "gaussian"
 
 method_list = ["directlimvam", "mss"]
 max_interventions = p * (p-1) // 2
 nb_interventions_list = np.arange(max_interventions+1)
-nb_seeds = 10
+nb_seeds = 50
 random_state_list = np.arange(nb_seeds)
 
 # run experiment

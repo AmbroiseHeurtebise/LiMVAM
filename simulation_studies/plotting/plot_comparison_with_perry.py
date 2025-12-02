@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 # matplotlib and seaborn style
-fontsize = 18
+fontsize = 19
 rc = {
     "font.size": fontsize,
     "xtick.labelsize": fontsize,
@@ -28,7 +28,8 @@ max_interventions = p*(p-1)//2
 labels = ["DirectLiMVAM", "MSS (KCI)"]
 
 # read dataframe
-simulation_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies")
+# simulation_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies")
+simulation_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies")
 results_dir = simulation_dir / "results/results_comparison_with_perry"
 save_name = f"DataFrame_with_m{m}_p{p}_n{n}_seeds{nb_seeds}"
 save_path = results_dir / save_name
@@ -41,7 +42,7 @@ palette = {
     'mss': palette_sns[7],
 }
 
-fig, ax = plt.subplots(figsize=(5, 2))
+fig, ax = plt.subplots(figsize=(6, 2.7))
 
 sns.lineplot(
     data=df, x="nb_interventions", y="score", hue="method", linewidth=2.5,
@@ -65,7 +66,7 @@ legend_styles = [
     Line2D([0], [0], color=palette["mss"], linewidth=2.5, linestyle='-'),
 ]
 fig.legend(
-    legend_styles, labels, bbox_to_anchor=(0.5, 1.03), loc="center",
+    legend_styles, labels, bbox_to_anchor=(0.5, 1.1), loc="center",
     ncol=3, borderaxespad=0., fontsize=fontsize
 )
 

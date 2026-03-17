@@ -5,10 +5,11 @@ from pathlib import Path
 import os
 from limvam.micado import micado
 from limvam.praline import praline
+from limvam.directlingam_extension import directlingam_extension
 
 
 # Limit the number of jobs
-N_JOBS = 10
+N_JOBS = 5
 os.environ["OMP_NUM_THREADS"] = str(N_JOBS)
 os.environ["MKL_NUM_THREADS"] = str(N_JOBS)
 os.environ["NUMEXPR_NUM_THREADS"] = str(N_JOBS)
@@ -24,7 +25,7 @@ parcellation = "aparc_sub"
 n_labels = 38
 subset = False
 group = False
-ica_algo = "pairwise"
+ica_algo = "direct_limvam"
 method_for_b = "LS_regression"
 random_state = 42
 steps = 1000  # for PRaLiNE
@@ -104,14 +105,18 @@ elif parcellation =="aparc_sub":
 if ica_algo == "shica_ml":
     start = time()
     B, T, P, _, _ = micado(
-        X, ica_algo=ica_algo, new_find_order_function=False, random_state=random_state)
+        X, ica_algo=ica_algo, random_state=random_state)
     execution_time = time() - start
 elif ica_algo == "pairwise":
     start = time()
     B, T, P = praline(X, steps=steps, lr=lr, method_for_b=method_for_b)
     execution_time = time() - start
+elif ica_algo == "direct_limvam":
+    start = time()
+    B, T, P = directlingam_extension(X)
+    execution_time = time() - start
 
-print(f"The method took {execution_time:.2f} s.")
+print(f"\nThe method {ica_algo} took {execution_time:.2f} s.\n")
 
 # Save data
 if group == 1:
@@ -120,7 +125,7 @@ elif group == 2:
     group_suffix = "_group2"
 else:
     group_suffix = ""
-save_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects_full}_subjects{group_suffix}_{ica_algo}_LS")
+save_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects_full}_subjects{group_suffix}_{ica_algo}")
 save_dir.mkdir(parents=True, exist_ok=True)
 np.save(save_dir / "P.npy", P)
 np.save(save_dir / "T.npy", T)

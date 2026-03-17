@@ -54,11 +54,13 @@ ax.get_legend().remove()
 ax.grid(alpha=0.3)
 ax.set_xlim([0, max_interventions])
 ax.set_xticks(np.arange(max_interventions+1, dtype=int))
+ax.set_yticks([0, 0.5, 1])
+ax.set_yticklabels(["0\%", "50\%", "100\%"])
 ax.set_xlabel("Number of interventions", fontsize=fontsize)
-ax.set_ylabel("Score", fontsize=fontsize)
-ax.set_title(
-    "Proportion of entirely recovered orderings (higher is better)", 
-    fontsize=fontsize, y=1.02)
+ax.set_ylabel("Proportion", fontsize=fontsize)
+# ax.set_title(
+#     "Proportion of entirely recovered orderings (higher is better)", 
+#     fontsize=fontsize, y=1.02)
 
 # legend
 legend_styles = [
@@ -66,7 +68,7 @@ legend_styles = [
     Line2D([0], [0], color=palette["mss"], linewidth=2.5, linestyle='-'),
 ]
 fig.legend(
-    legend_styles, labels, bbox_to_anchor=(0.5, 1.1), loc="center",
+    legend_styles, labels, bbox_to_anchor=(0.5, 1.02), loc="center",
     ncol=3, borderaxespad=0., fontsize=fontsize
 )
 

@@ -151,9 +151,14 @@ legend_styles = [
     Line2D([0], [0], color=palette[4], linewidth=2.5, linestyle=(0, (2, 2))),
     Line2D([0], [0], color=palette[5], linewidth=2.5, linestyle=(0, (2, 2))),
 ]
+# fig.legend(
+#     legend_styles, labels, bbox_to_anchor=(0.5, 1.05), loc="center",
+#     ncol=3, borderaxespad=0., fontsize=fontsize
+# )
 fig.legend(
-    legend_styles, labels, bbox_to_anchor=(0.5, 1.05), loc="center",
-    ncol=3, borderaxespad=0., fontsize=fontsize
+    legend_styles, labels, bbox_to_anchor=(0.98, 0.57), loc="center left",
+    ncol=1, borderaxespad=0., fontsize=fontsize, handletextpad=0.4, handlelength=1.5,
+    labelspacing=0.7,
 )
 
 # save figure

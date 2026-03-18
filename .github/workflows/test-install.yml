@@ -1,4 +1,4 @@
-name: Test MICaDo Installation
+name: Test LiMVAM Installation
 
 on:
   push:

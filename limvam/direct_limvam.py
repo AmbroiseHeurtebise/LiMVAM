@@ -109,7 +109,7 @@ def direct_limvam(X):
     T: Strictly lower triangular matrices (ndarray of shape (m, p, p))
     P: Permutation matrix that contains the ordering (ndarray of shape (p, p))
     """
-    # estimate the causal ordering using "recursive residuals"
+    # estimate the causal ordering using the cross-covariance-based criterion
     order = estimate_causal_order(X)
     
     # estimate causal weights with one-step Feasible Generalized Least Squares

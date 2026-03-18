@@ -1,8 +1,3 @@
-"""
-Python implementation of the Pairwise likelihood RAtios for 
-LInear Non-gaussian Estimation (PRaLiNE) algorithm.
-"""
-
 import jax.numpy as jnp
 from jax import grad, jit
 from jax.example_libraries import optimizers
@@ -53,7 +48,9 @@ def profile_log_likelihood(b, x, y):
     return -(jnp.linalg.slogdet(S_x)[1] + jnp.linalg.slogdet(S_e)[1])
 
 
-def compute_ratio_for_two_variables(x, y, steps=1000, lr=1e-2, method_for_b="LS_regression"):
+def compute_ratio_for_two_variables(
+    x, y, steps=1000, lr=1e-2, method_for_b="LS_regression"
+):
     m, _ = x.shape
 
     if method_for_b == "MLE":
@@ -72,33 +69,34 @@ def compute_ratio_for_two_variables(x, y, steps=1000, lr=1e-2, method_for_b="LS_
 
 def find_parent_variable(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
     m, p_current, _ = X.shape
+    Xc = X - X.mean(axis=-1, keepdims=True)
+    Xz = Xc / Xc.std(axis=-1, keepdims=True)
     
     # Initialize score matrix and coefficients
-    R = np.zeros((p_current, p_current))
+    scores = np.zeros((p_current, p_current))
     B = np.zeros((m, p_current, p_current))
     
     # Compute log-ratios for each pair of variables
     indices = [(i, j) for i in range(p_current) for j in range(p_current) if i < j]
     for (i, j) in indices:
         ratio, b_hat, b_hat_reverse = compute_ratio_for_two_variables(
-            X[:, i], X[:, j], steps=steps, lr=lr, method_for_b=method_for_b)
-        R[i, j] = ratio
-        R[j, i] = -ratio
+            Xz[:, i], Xz[:, j], steps=steps, lr=lr, method_for_b=method_for_b)
+        scores[i, j] = ratio
+        scores[j, i] = -ratio
         B[:, i, j] = b_hat
         B[:, j, i] = b_hat_reverse
     
-    # Penalize negative scores
-    scores = np.sum(np.minimum(0, R) ** 2, axis=1)
-    
-    # Find parent variable
-    parent = np.argmin(scores)
+    # Penalize negative scores and find parent variable
+    parent_id = np.argmin(np.sum(np.minimum(0, scores) ** 2, axis=1))
     
     # Remove the effect of the parent variable
-    B_parent = B[:, parent][:, :, np.newaxis]  # shape (m, p, 1)
-    X_parent = X[:, parent][:, np.newaxis, :]  # shape (m, 1, n)
-    X -= B_parent * X_parent
+    B_parent = B[:, parent_id][:, :, np.newaxis]  # shape (m, p_current, 1)
+    X_parent = Xz[:, parent_id][:, np.newaxis, :]  # shape (m, 1, n)
+    r_all_on_parent = Xz - B_parent * X_parent
+    r_all_on_parent = np.delete(
+        r_all_on_parent, parent_id, axis=1)  # shape (m, p_current-1, n)
     
-    return parent, X
+    return parent_id, r_all_on_parent
 
 
 def estimate_causal_order(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
@@ -110,7 +108,6 @@ def estimate_causal_order(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
     while len(order) < p - 1:
         parent, X_current = find_parent_variable(
             X_current, steps=steps, lr=lr, method_for_b=method_for_b)
-        X_current = np.delete(X_current, parent, axis=1)
         order.append(remaining_indices[parent])
         remaining_indices = np.delete(remaining_indices, parent)
     order.append(remaining_indices[0])
@@ -118,10 +115,46 @@ def estimate_causal_order(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
     return order
 
 
-def praline(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
+def pairwise_limvam(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
+    """
+    Assume the model xi = Bi xi + ei, where Bi are DAG matrices that share the 
+    same causal ordering, and the disturbances ei are correlated across views.
+    PairwiseLiMVAM identifies the entire causal ordering, and then estimates causal 
+    weights using one-step Feasible Generalized Least Squares.
+    
+    Parameters
+    ----------
+    X: ndarray of shape (m, p, n)
+        Training data, where ``m`` is the number of views, ``p`` is the number 
+        of components, and ``n`` is the number of samples.
+    
+    steps: int, optional (default=1000)
+        Number of steps of the Adam optimizer; this parameter is only used
+        if method_for_b is 'MLE'.
+        
+    lr: float, optional (default=1e-2)
+        Learning rate of the Adam optimizer; this parameter is only used
+        if method_for_b is 'MLE'.
+    
+    method_for_b: string, optional (default='LS_regression')
+        The method used to estimate regression coefficients.
+        It can be either 'LS_regression' or 'MLE'.
+    
+    Returns
+    -------
+    B: DAG matrices (ndarray of shape (m, p, p))
+    T: Strictly lower triangular matrices (ndarray of shape (m, p, p))
+    P: Permutation matrix that contains the ordering (ndarray of shape (p, p))
+    """
+    # estimate the causal ordering using the likelihood-based criterion
     order = estimate_causal_order(X, steps=steps, lr=lr, method_for_b=method_for_b)
-    P = np.eye(X.shape[1])[order]
+    
+    # estimate causal weights with one-step Feasible Generalized Least Squares
     X_ordered = X[:, order]
     T = estimate_triangular_matrices_Ti(X_ordered)
+    
+    # reconstruct adjacency matrices
+    P = np.eye(X.shape[1])[order]
     B = P.T @ T @ P
+
     return B, T, P

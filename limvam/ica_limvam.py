@@ -1,7 +1,3 @@
-"""
-Python implementation of the Multi-view ICA-based Causal Discovery algorithm.
-"""
-
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from multiviewica import multiviewica
@@ -9,7 +5,7 @@ from shica import shica_j, shica_ml
 from .utils import find_order, _estimate_causal_order
 
 
-def micado(
+def ica_limvam(
     X,
     shared_causal_ordering=True,
     ica_algo="shica_ml",
@@ -19,7 +15,10 @@ def micado(
     return_full=False,
 ):
     """
-    Implementation of the Multi-view ICA-based Causal Discovery algorithm.
+    Assume the model xi = Bi xi + Di s + ni, where Bi are DAG matrices that can
+    share the same causal ordering, Di are diagonal scaling matrices, s are shared
+    sources, and ni are Gaussian disturbances.
+    ICA-LiMVAM estimates matrices Bi, and then identifies the causal ordering(s).
 
     Parameters
     ----------
@@ -75,6 +74,12 @@ def micado(
     W: ndarray, shape (n_views, n_components, n_components)
         Unmixing matrices found by the multiview ICA algorithm. 
         Only returned if return_full==True.
+    
+    D: ndarray, shape (n_views, n_components)
+        Scaling matrices. Only returned if return_full==True.
+    
+    Sigma: ndarray, shape (n_views, n_components)
+        Variances of the disturbances ni. Only returned if return_full==True.
     """
     m, p, n = X.shape
     
@@ -128,5 +133,5 @@ def micado(
         T = np.array([Pi @ Bi @ Pi.T for Pi, Bi in zip(P, B)])
 
     if return_full:
-        return B, T, P, S_avg, W
-    return B, T, P, D, Sigma
+        return B, T, P, S_avg, W, D, Sigma
+    return B, T, P

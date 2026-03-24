@@ -4,86 +4,47 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 import pickle
 from pathlib import Path
-from scipy.stats import spearmanr
 
 
 # %%
 # Parameters
-n_subjects = 98
-parcellation = "aparc_sub"
 n_arrows = 10
-only_clean = False
-seed = 2
-groups = False
-ica_algo = "pairwise"
+algo = "pairwise_limvam"
+plot_which_B = "median"  # choose among "median", "positive_normalized", and "random"
 
 # Load results
 expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/real_data_experiments")
-if only_clean:
-    results_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects}_subjects_clean")
-elif ica_algo == "pairwise":
-    results_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects}_subjects_{ica_algo}")
-else:
-    results_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects}_subjects_seed{seed}_{ica_algo}")
+results_dir = Path(expes_dir / f"4_results/aparc_sub_98_subjects_{algo}")
 
-if groups:
-    n_subjects //= 2
-    results_dir1 = Path(expes_dir / f"4_results/{parcellation}_{n_subjects}_subjects_group1_{ica_algo}")
-    results_dir2 = Path(expes_dir / f"4_results/{parcellation}_{n_subjects}_subjects_group2_{ica_algo}")
-    P1 = np.load(results_dir1 / "P.npy")
-    T1 = np.load(results_dir1 / "T.npy")
-    B1 = np.load(results_dir1 / "B.npy")
-    P2 = np.load(results_dir2 / "P.npy")
-    T2 = np.load(results_dir2 / "T.npy")
-    B2 = np.load(results_dir2 / "B.npy")
-    with open(results_dir1 / f"labels.pkl", "rb") as f:
-        labels = pickle.load(f)
-else:
-    P = np.load(results_dir / "P.npy")
-    T = np.load(results_dir / "T.npy")
-    B = np.load(results_dir / "B.npy")
-    with open(results_dir / f"labels.pkl", "rb") as f:
-        labels = pickle.load(f)
-
-# %%
-# Print Spearman rank correlation
-if groups:
-    B1_med = np.median(B1, axis=0)
-    B2_med = np.median(B2, axis=0)
-    rho, p_value = spearmanr(B1_med.flatten(), B2_med.flatten())
-    print(f"Spearman rank correlation between groups 1 and 2: {rho:.3f} ; p-value: {p_value:.3f}")
+P = np.load(results_dir / "P.npy")
+T = np.load(results_dir / "T.npy")
+B = np.load(results_dir / "B.npy")
+with open(results_dir / f"labels.pkl", "rb") as f:
+    labels = pickle.load(f)
 
 # %%
 # Plot average matrix T (should be lower triangular)
-if groups:
-    fig, axes = plt.subplots(1, 2, figsize=(8, 4))
-    axes[0].imshow(np.mean(np.abs(T1), axis=0))
-    axes[1].imshow(np.mean(np.abs(T2), axis=0))
-    fig.suptitle(r"Average absolute value lower triangular matrices $T^i$")
-else:
-    plt.imshow(np.mean(np.abs(T), axis=0))
-    plt.colorbar()
-    plt.title("Average absolute value lower triangular matrix T")
+plt.imshow(np.mean(np.abs(T), axis=0))
+plt.colorbar()
+plt.title("Average absolute value lower triangular matrix T")
 plt.show()
 
 # %%
 # Define matrix B_avg
-use_median = True
-if groups:
-    B = B1
-if use_median:
+if plot_which_B == "median":
+    # Get the median matrix B over subjects
     B_avg = np.median(B, axis=0)
-else:    
+elif plot_which_B == "positive_normalized":    
     # Normalize matrices Bi: divide each Bi by its max in absolute value
     B_maxs = np.array([np.max(Bi_abs) for Bi_abs in np.abs(B)])[:, np.newaxis, np.newaxis]
     B_norm = B / B_maxs
     B_avg = np.mean(B_norm, axis=0)
-
-# %%
-# Choose random subject
-go = False
-if go:
-    idx = np.random.randint(0, n_subjects)
+elif plot_which_B == "random":
+    # Pick one of the 98 subjects
+    n_subjects = len(B)
+    random_state = 42
+    rng = np.random.RandomState(random_state)
+    idx = rng.randint(0, n_subjects)
     B_avg = B[idx]
 
 # %%
@@ -121,11 +82,13 @@ ax.set_xticks(np.arange(len(label_names)))
 ax.set_yticks(np.arange(len(label_names)))
 ax.set_xticklabels(label_names, rotation=45, ha="right")
 ax.set_yticklabels(label_names)
+
+save = True
+if save:
+    figures_dir = "/storage/store4/work/aheurteb/LiMVAM/real_data_experiments/6_figures/"
+    plt.savefig(figures_dir + f"top_coefs_B_{algo}.pdf", bbox_inches="tight")
 plt.show()
 
 # %%
-order = np.argmax(P1, axis=1)
-labels_ordered = [label_names[order[i]] for i in range(len(label_names))]
-labels_ordered
 
 # %%

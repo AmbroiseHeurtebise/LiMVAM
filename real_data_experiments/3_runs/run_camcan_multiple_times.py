@@ -35,13 +35,11 @@ X_list = [X_loaded[key] for key in X_loaded.files]
 with open(load_dir / f"labels.pkl", "rb") as f:
     labels_list = pickle.load(f)
 
-# Get all 38 labels
-i = 0
-while len(labels_list[i]) < 38:
-    i+=1
-labels = labels_list[i]
+# Get a list of all 38 labels
+n_labels_total = max(len(set(x)) for x in labels_list)
+labels = next(x for x in labels_list if len(set(x)) == n_labels_total)
 
-# Keep only 10 regions
+# Predefined list of 10 labels/regions
 selected_label_names = [
     'superiortemporal_3-lh',
     'superiortemporal_5-rh',
@@ -56,7 +54,7 @@ selected_label_names = [
 ]
 n_labels = len(selected_label_names)
 
-# Only keep subjects who have all these regions available
+# Only keep the 98 subjects (out of 152) who have all these regions available
 X = []
 for X_current, labels_current in zip(X_list, labels_list):
     label_names_current = {label.name for label in labels_current}
@@ -100,7 +98,7 @@ for i, (B, T, P) in enumerate(results):
     P_total[i] = P
 
 # Save data
-save_dir = Path(expes_dir / f"4_results/aparc_sub_{n_subjects_full}_subjects_{n_runs}_runs_{algo}")
+save_dir = Path(expes_dir / f"4_results/aparc_sub_{n_subjects_batch}_random_subjects_{n_runs}_runs_{algo}")
 save_dir.mkdir(parents=True, exist_ok=True)
 np.save(save_dir / "B_total.npy", B_total)
 np.save(save_dir / "T_total.npy", T_total)

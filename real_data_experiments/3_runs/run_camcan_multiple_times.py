@@ -4,8 +4,8 @@ from pathlib import Path
 import os
 from time import time
 from joblib import Parallel, delayed
-from limvam.micado import micado
-from limvam.praline import praline
+from limvam.ica_limvam import ica_limvam
+from limvam.pairwise_limvam import pairwise_limvam
 
 
 # Limit the number of jobs
@@ -21,11 +21,8 @@ os.environ["XLA_FLAGS"] = (
 
 # Parameters
 n_runs = 50
-# keep_subjects_rate = 1 / 2  # only keep 50% of the subjects
 n_subjects_batch = 30  # only keep 30 subjects
-ica_algo = "pairwise"
-steps = 1000
-lr = 1e-2
+algo = "pairwise_limvam"
 
 # Load data
 expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/real_data_experiments")
@@ -72,7 +69,6 @@ labels = [label for label in labels if label.name in selected_label_names]
 n_subjects_full = len(X)
 
 # Run our method ``n_runs`` times
-# n_subjects_batch = int(n_subjects_full * keep_subjects_rate)
 B_total = np.zeros((n_runs, n_subjects_batch, n_labels, n_labels))
 T_total = np.zeros((n_runs, n_subjects_batch, n_labels, n_labels))
 P_total = np.zeros((n_runs, n_labels, n_labels))
@@ -82,10 +78,10 @@ def single_run(i):
     subjects_idx = rng.choice(n_subjects_full, size=n_subjects_batch, replace=False)
     X_subset = X[subjects_idx]
     
-    if ica_algo == "shica_ml":
-        B, T, P, _, _ = micado(X_subset, ica_algo=ica_algo, random_state=i)
-    elif ica_algo == "pairwise":
-        B, T, P = praline(X_subset, steps=steps, lr=lr)
+    if algo == "ica_limvam":
+        B, T, P = ica_limvam(X_subset, ica_algo="shica_ml", random_state=i)
+    elif algo == "pairwise_limvam":
+        B, T, P = pairwise_limvam(X_subset)
     return B, T, P
 
 start = time()
@@ -104,7 +100,7 @@ for i, (B, T, P) in enumerate(results):
     P_total[i] = P
 
 # Save data
-save_dir = Path(expes_dir / f"4_results/aparc_sub_{n_subjects_full}_subjects_{n_runs}_runs_{ica_algo}")
+save_dir = Path(expes_dir / f"4_results/aparc_sub_{n_subjects_full}_subjects_{n_runs}_runs_{algo}")
 save_dir.mkdir(parents=True, exist_ok=True)
 np.save(save_dir / "B_total.npy", B_total)
 np.save(save_dir / "T_total.npy", T_total)

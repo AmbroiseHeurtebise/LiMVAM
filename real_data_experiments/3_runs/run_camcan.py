@@ -3,9 +3,9 @@ import pickle
 from time import time
 from pathlib import Path
 import os
-from limvam.micado import micado
-from limvam.praline import praline
-from limvam.directlingam_extension import directlingam_extension
+from limvam.ica_limvam import ica_limvam
+from limvam.pairwise_limvam import pairwise_limvam
+from limvam.direct_limvam import direct_limvam
 
 
 # Limit the number of jobs
@@ -25,11 +25,8 @@ parcellation = "aparc_sub"
 n_labels = 38
 subset = False
 group = False
-ica_algo = "direct_limvam"
-method_for_b = "LS_regression"
+algo = "direct_limvam"
 random_state = 42
-steps = 1000  # for PRaLiNE
-lr = 1e-2  # for PRaLiNE
 
 # Load data
 expes_dir = Path("/storage/store4/work/aheurteb/LiMVAM/real_data_experiments")
@@ -102,21 +99,21 @@ elif parcellation =="aparc_sub":
         X = X[n_subjects_full:]
 
 # Apply causal discovery method
-if ica_algo == "shica_ml":
+if algo == "ica_limvam":
     start = time()
-    B, T, P, _, _ = micado(
-        X, ica_algo=ica_algo, random_state=random_state)
+    B, T, P = ica_limvam(
+        X, ica_algo="shica_ml", random_state=random_state)
     execution_time = time() - start
-elif ica_algo == "pairwise":
+elif algo == "pairwise_limvam":
     start = time()
-    B, T, P = praline(X, steps=steps, lr=lr, method_for_b=method_for_b)
+    B, T, P = pairwise_limvam(X)
     execution_time = time() - start
-elif ica_algo == "direct_limvam":
+elif algo == "direct_limvam":
     start = time()
-    B, T, P = directlingam_extension(X)
+    B, T, P = direct_limvam(X)
     execution_time = time() - start
 
-print(f"\nThe method {ica_algo} took {execution_time:.2f} s.\n")
+print(f"\nThe method {algo} took {execution_time:.2f} s.\n")
 
 # Save data
 if group == 1:
@@ -125,7 +122,7 @@ elif group == 2:
     group_suffix = "_group2"
 else:
     group_suffix = ""
-save_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects_full}_subjects{group_suffix}_{ica_algo}")
+save_dir = Path(expes_dir / f"4_results/{parcellation}_{n_subjects_full}_subjects{group_suffix}_{algo}")
 save_dir.mkdir(parents=True, exist_ok=True)
 np.save(save_dir / "P.npy", P)
 np.save(save_dir / "T.npy", T)

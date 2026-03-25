@@ -28,7 +28,8 @@ p_list = [3, 6, 9, 12]
 nb_seeds = 50
 random_state_list = np.arange(nb_seeds)
 algo_list = [
-    "shica_j", "shica_ml", "multi_group_direct_lingam", "lingam", "pairwise", "direct_limvam"]
+    "ica_limvam_j", "ica_limvam_ml", "multi_group_direct_lingam", "lingam", "pairwise_limvam",
+    "direct_limvam"]
 
 # run experiment
 nb_expes = len(m_list) * len(p_list) * len(random_state_list) * len(algo_list)

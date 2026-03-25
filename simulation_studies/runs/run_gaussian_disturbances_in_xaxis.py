@@ -22,7 +22,7 @@ new_find_order_function = False
 nb_gaussian_disturbances_list = np.arange(p+1)
 nb_seeds = 50
 random_state_list = np.arange(nb_seeds)
-algo_list = ["multiviewica", "shica_j", "shica_ml", "multi_group_direct_lingam", "lingam"]
+algo_list = ["ica_limvam_j", "ica_limvam_ml", "multi_group_direct_lingam", "lingam"]
 
 # run experiment
 nb_expes = len(nb_gaussian_disturbances_list) * len(random_state_list) * len(algo_list)

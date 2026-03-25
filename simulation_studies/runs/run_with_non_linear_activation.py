@@ -28,7 +28,9 @@ use_scale_D = True
 # varying parameters
 nb_seeds = 100
 random_state_list = np.arange(nb_seeds)
-algo_list = ["shica_j", "shica_ml", "multi_group_direct_lingam", "lingam", "pairwise"]
+algo_list = [
+    "ica_limvam_j", "ica_limvam_ml", "multi_group_direct_lingam", "lingam",
+    "pairwise_limvam"]
 non_linearity_alpha_list = np.linspace(0, 1, 11)
 
 # run experiment

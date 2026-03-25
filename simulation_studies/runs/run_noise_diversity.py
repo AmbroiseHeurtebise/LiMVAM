@@ -25,7 +25,7 @@ use_scale_D = True
 nb_equal_variances_list = np.arange(m+1)
 nb_seeds = 50
 random_state_list = np.arange(nb_seeds)
-algo_list = ["shica_j", "shica_ml", "pairwise"]
+algo_list = ["ica_limvam_j", "ica_limvam_ml", "pairwise_limvam"]
 
 # run experiment
 nb_expes = len(nb_equal_variances_list) * len(random_state_list) * len(algo_list)

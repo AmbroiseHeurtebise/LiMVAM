@@ -24,10 +24,9 @@ nb_gaussian_disturbances_list = [0, 2, 4]
 nb_seeds = 50
 random_state_list = np.arange(nb_seeds)
 n_list = np.logspace(2, 4, 21, dtype=int)
-# algo_list = [
-#     "multiviewica", "shica_j", "shica_ml", "multi_group_direct_lingam", "lingam",
-#     "pairwise", "mv_notears"]
-algo_list = ['direct_limvam']  # XXX
+algo_list = [
+    "ica_limvam_j", "ica_limvam_ml", "multi_group_direct_lingam", "lingam",
+    "pairwise_limvam", "direct_limvam"]
 
 # run experiment
 nb_expes = len(nb_gaussian_disturbances_list) * len(random_state_list) * len(n_list) * len(algo_list)

@@ -28,7 +28,7 @@ shared_causal_ordering_list = [True, False]
 nb_zeros_Ti_list = np.arange(p * (p - 1) // 2 + 1)
 nb_seeds = 30
 random_state_list = np.arange(nb_seeds)
-algo_list = ["shica_j", "shica_ml", "pairwise"]
+algo_list = ["ica_limvam_j", "ica_limvam_ml", "pairwise_limvam"]
 
 # run experiment
 nb_expes = len(shared_causal_ordering_list) * len(nb_zeros_Ti_list) * len(random_state_list) \

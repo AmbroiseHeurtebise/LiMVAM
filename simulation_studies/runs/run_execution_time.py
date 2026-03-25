@@ -31,7 +31,8 @@ nb_gaussian_disturbances = p
 nb_seeds = 200
 random_state_list = np.arange(nb_seeds)
 algo_list = [
-    "shica_j", "shica_ml", "multi_group_direct_lingam", "lingam", "pairwise", "direct_limvam"]
+    "ica_limvam_j", "ica_limvam_ml", "multi_group_direct_lingam", "lingam", "pairwise_limvam",
+    "direct_limvam"]
 
 # run experiment
 nb_expes = len(random_state_list) * len(algo_list)

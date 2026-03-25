@@ -5,7 +5,7 @@ from time import time
 import os
 from itertools import product
 from joblib import Parallel, delayed
-from limvam.directlingam_extension import estimate_causal_order
+from limvam.direct_limvam import estimate_causal_order
 
 from sparse_shift.utils import dag2cpdag
 from sparse_shift.methods import MinChange
@@ -129,7 +129,7 @@ def run_experiment(
     p,
     n,
     nb_interventions,
-    method="directlimvam",
+    method="direct_limvam",
     random_state=None,
     disturbances="gaussian",
 ):
@@ -145,7 +145,7 @@ def run_experiment(
         execution_time = time() - start
     
     # DirectLiMVAM
-    if method == "directlimvam":
+    if method == "direct_limvam":
         start = time()
         order_estimated = estimate_causal_order(X)
         score = (order == order_estimated).all() * 1
@@ -178,7 +178,7 @@ p = 3
 n = 200
 disturbances = "gaussian"
 
-method_list = ["directlimvam", "mss"]
+method_list = ["direct_limvam", "mss"]
 max_interventions = p * (p-1) // 2
 nb_interventions_list = np.arange(max_interventions+1)
 nb_seeds = 50

@@ -24,8 +24,8 @@ nb_seeds = 50
 metric = "error_B"  # or "error_T", "error_P_exact", "error_P_spearmanr", "amari_distance"
 
 # read dataframe
-results_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/results/results_noise_diversity/"
-# results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_noise_diversity/"
+results_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/experiments_synthetic/results/results_noise_diversity/"
+# results_dir = "/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic/results/results_noise_diversity/"
 save_name = f"DataFrame_with_{nb_seeds}_seeds_time_and_scale"
 save_path = results_dir + save_name
 df = pd.read_csv(save_path)
@@ -125,7 +125,7 @@ fig.legend(
 # fig.text(0.5, -0.42, caption, ha='center', va='center', fontsize=fontsize)
 
 # save figure
-figures_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/figures")
-# figures_dir = Path("/storage/store2/work/aheurteb/LiMVAM/simulation_studies/figures")
+figures_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/experiments_synthetic/figures")
+# figures_dir = Path("/storage/store2/work/aheurteb/LiMVAM/experiments_synthetic/figures")
 plt.savefig(figures_dir / f"simulation_noise_diversity.pdf", bbox_inches="tight")
 # plt.show()

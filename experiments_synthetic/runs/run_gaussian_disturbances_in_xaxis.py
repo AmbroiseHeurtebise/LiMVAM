@@ -45,7 +45,7 @@ df = pd.DataFrame(dict_res)
 print(df)
 
 # save dataframe
-results_dir = "/storage/store2/work/aheurteb/MICaDo/simulation_studies/results/"
+results_dir = "/storage/store2/work/aheurteb/MICaDo/experiments_synthetic/results/"
 parent_dir = "results_gaussian_disturbances_in_xaxis/"
 save_name = f"DataFrame_with_{nb_seeds}_seeds_and_7_metrics"
 save_path = results_dir + parent_dir + save_name

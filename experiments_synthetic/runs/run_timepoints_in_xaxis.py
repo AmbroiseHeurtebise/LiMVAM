@@ -53,7 +53,7 @@ execution_time = time() - start
 print(f"The experiment took {execution_time:.2f} s.")
 
 # save dataframe
-results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/"
+results_dir = "/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic/results/"
 if shared_causal_ordering:
     parent_dir = "results_timepoints_in_xaxis/shared_P/"
 else:

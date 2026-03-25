@@ -270,7 +270,7 @@ def plot_envelope(
     if save:
         if subject is None:
             raise ValueError("subject should not be None when save=True")
-        save_dir = "/storage/store2/work/aheurteb/mvica_lingam/real_data_experiments/figures/"
+        save_dir = "/storage/store2/work/aheurteb/mvica_lingam/experiments_meg/figures/"
         plt.savefig(save_dir + f"envelope_sub_{subject}.pdf")
     plt.show()
 

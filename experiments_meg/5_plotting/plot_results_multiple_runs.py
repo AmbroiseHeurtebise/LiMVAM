@@ -15,7 +15,7 @@ algo = "pairwise_limvam"
 n_arrows = 10
 
 # Load results
-expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/real_data_experiments")
+expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/experiments_meg")
 results_dir = Path(expes_dir / f"4_results/aparc_sub_{n_subjects_batch}_random_subjects_{n_runs}_runs_{algo}")
 
 P_total = np.load(results_dir / "P_total.npy")
@@ -70,7 +70,7 @@ cbar.ax.set_yticklabels(["-1", "0", "1"])
 
 save = True
 if save:
-    figures_dir = "/storage/store4/work/aheurteb/LiMVAM/real_data_experiments/6_figures/"
+    figures_dir = "/storage/store4/work/aheurteb/LiMVAM/experiments_meg/6_figures/"
     plt.savefig(figures_dir + f"pearson_coefs_B_{algo}.pdf", bbox_inches="tight")
 plt.show()
 

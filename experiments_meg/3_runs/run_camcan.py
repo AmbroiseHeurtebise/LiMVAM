@@ -24,7 +24,7 @@ algo = "direct_limvam"
 random_state = 42
 
 # Load data
-expes_dir = Path("/storage/store4/work/aheurteb/LiMVAM/real_data_experiments")
+expes_dir = Path("/storage/store4/work/aheurteb/LiMVAM/experiments_meg")
 load_dir = expes_dir / f"2_data_envelopes/aparc_sub_152_subjects"
 
 X_loaded = np.load(load_dir / f"X.npz")

@@ -23,7 +23,7 @@ nb_seeds = 100
 metric = "error_B"  # or "error_T", "error_P_exact", "error_P_spearmanr", "amari_distance"
 
 # read dataframe
-results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_with_non_linear_activation/"
+results_dir = "/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic/results/results_with_non_linear_activation/"
 save_name = f"DataFrame_with_{nb_seeds}_seeds"
 save_path = results_dir + save_name
 df = pd.read_csv(save_path)
@@ -91,6 +91,6 @@ caption = (
 fig.text(0.5, -0.3, caption, ha='center', va='center', fontsize=fontsize)
 
 # save figure
-figures_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies/figures")
+figures_dir = Path("/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic/figures")
 plt.savefig(figures_dir / f"simulation_with_non_linear_activation.pdf", bbox_inches="tight")
 plt.show()

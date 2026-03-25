@@ -53,7 +53,7 @@ execution_time = time() - start
 print(f"The experiment took {execution_time:.2f} s.")
 
 # save dataframe
-results_dir = "/storage/store2/work/aheurteb/LiMVAM/simulation_studies/results/results_noise_diversity/"
+results_dir = "/storage/store2/work/aheurteb/LiMVAM/experiments_synthetic/results/results_noise_diversity/"
 save_name = f"DataFrame_with_{nb_seeds}_seeds_time_and_scale"
 save_path = results_dir + save_name
 df.to_csv(save_path, index=False)

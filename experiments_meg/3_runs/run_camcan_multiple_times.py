@@ -25,7 +25,7 @@ n_subjects_batch = 30  # only keep 30 subjects
 algo = "pairwise_limvam"
 
 # Load data
-expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/real_data_experiments")
+expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/experiments_meg")
 load_dir = expes_dir / f"2_data_envelopes/aparc_sub_152_subjects"
 
 X_loaded = np.load(load_dir / f"X.npz")

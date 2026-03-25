@@ -65,7 +65,7 @@ execution_time = time() - start
 print(f"The experiment took {execution_time:.2f} s.")
 
 # save dataframe
-results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_execution_time/"
+results_dir = "/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic/results/results_execution_time/"
 save_name = f"DataFrame_with_{nb_seeds}_seeds_new_methods_no_shared_disturbances_gaussian"
 save_path = results_dir + save_name
 df.to_csv(save_path, index=False)

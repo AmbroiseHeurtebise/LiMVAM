@@ -28,8 +28,8 @@ beta2 = 2.5
 # read dataframe
 beta1_str = str(beta1).replace('.', '')
 beta2_str = str(beta2).replace('.', '')
-# results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_p_in_xaxis/"
-results_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/results/results_p_in_xaxis/"
+# results_dir = "/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic/results/results_p_in_xaxis/"
+results_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/experiments_synthetic/results/results_p_in_xaxis/"
 save_name = f"DataFrame_with_{nb_seeds}_seeds_beta_{beta1_str}_{beta2_str}_no_shared_disturbances"
 save_path = results_dir + save_name
 df = pd.read_csv(save_path)
@@ -168,7 +168,7 @@ fig.legend(
 # fig.text(0.5, -0.05, caption, ha='center', va='center', fontsize=fontsize)
 
 # save figure
-# figures_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies/figures")
-figures_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies/figures")
+# figures_dir = Path("/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic/figures")
+figures_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/experiments_synthetic/figures")
 plt.savefig(figures_dir / f"simulation_p_in_xaxis.pdf", bbox_inches="tight")
 # plt.show()

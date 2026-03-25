@@ -28,8 +28,8 @@ max_interventions = p*(p-1)//2
 labels = ["DirectLiMVAM", "MSS (KCI)"]
 
 # read dataframe
-# simulation_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies")
-simulation_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies")
+# simulation_dir = Path("/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic")
+simulation_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/experiments_synthetic")
 results_dir = simulation_dir / "results/results_comparison_with_perry"
 save_name = f"DataFrame_with_m{m}_p{p}_n{n}_seeds{nb_seeds}"
 save_path = results_dir / save_name

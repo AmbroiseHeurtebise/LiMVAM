@@ -13,7 +13,7 @@ algo = "pairwise_limvam"
 plot_which_B = "median"  # choose among "median", "positive_normalized", and "random"
 
 # Load results
-expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/real_data_experiments")
+expes_dir = Path("/storage/store2/work/aheurteb/LiMVAM/experiments_meg")
 results_dir = Path(expes_dir / f"4_results/aparc_sub_98_subjects_{algo}")
 
 P = np.load(results_dir / "P.npy")
@@ -85,7 +85,7 @@ ax.set_yticklabels(label_names)
 
 save = True
 if save:
-    figures_dir = "/storage/store4/work/aheurteb/LiMVAM/real_data_experiments/6_figures/"
+    figures_dir = "/storage/store4/work/aheurteb/LiMVAM/experiments_meg/6_figures/"
     plt.savefig(figures_dir + f"top_coefs_B_{algo}.pdf", bbox_inches="tight")
 plt.show()
 

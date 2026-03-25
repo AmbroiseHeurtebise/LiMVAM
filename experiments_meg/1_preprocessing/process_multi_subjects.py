@@ -60,7 +60,7 @@ for i, subject in enumerate(subjects):
 
 # Save data
 n_subjects_found = len(X_list)  # may be lower than n_subjects
-expes_dir = Path("/storage/store2/work/aheurteb/mvica_lingam/real_data_experiments")
+expes_dir = Path("/storage/store2/work/aheurteb/mvica_lingam/experiments_meg")
 save_dir = expes_dir / f"2_data_envelopes/{parcellation}_{n_subjects_found}_subjects"
 save_dir.mkdir(parents=True, exist_ok=True)
 

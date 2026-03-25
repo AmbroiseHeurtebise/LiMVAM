@@ -23,8 +23,8 @@ nb_seeds = 200
 median_or_mean = "mean"
 
 # read dataframe
-# simulation_dir = Path("/storage/store4/work/aheurteb/LiMVAM/simulation_studies")
-simulation_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/simulation_studies")
+# simulation_dir = Path("/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic")
+simulation_dir = Path("/Users/ambroiseheurtebise/Desktop/LiMVAM/experiments_synthetic")
 results_dir = simulation_dir / "results/results_execution_time"
 save_name = f"DataFrame_with_{nb_seeds}_seeds_new_methods_no_shared_disturbances_gaussian"
 save_path = results_dir / save_name

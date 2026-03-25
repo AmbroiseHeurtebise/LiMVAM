@@ -30,7 +30,7 @@ estimator = "mean"
 labels = ['PRaLiNE', 'MICaDo-ML', 'MICaDo-J', 'ICA-LiNGAM', 'MultiGroupDirectLiNGAM']
 
 # read dataframe
-results_dir = "/storage/store2/work/aheurteb/LiMVAM/simulation_studies/results/"
+results_dir = "/storage/store2/work/aheurteb/LiMVAM/experiments_synthetic/results/"
 parent_dir = "results_noise_in_xaxis/"
 save_name = f"DataFrame_with_{nb_seeds}_seeds_time_and_scale"
 save_path = results_dir + parent_dir + save_name
@@ -97,7 +97,7 @@ fig.legend(
 )
 
 # save figure
-figures_dir = Path("/storage/store2/work/aheurteb/LiMVAM/simulation_studies/figures")
+figures_dir = Path("/storage/store2/work/aheurteb/LiMVAM/experiments_synthetic/figures")
 figures_dir.mkdir(parents=True, exist_ok=True)
 plt.savefig(figures_dir / "simulation_noise_in_xaxis.pdf", bbox_inches="tight")
 plt.show()

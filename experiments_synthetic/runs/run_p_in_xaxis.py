@@ -61,7 +61,7 @@ print(f"The experiment took {execution_time:.2f} s.")
 # save dataframe
 beta1_str = str(beta1).replace('.', '')
 beta2_str = str(beta2).replace('.', '')
-results_dir = "/storage/store4/work/aheurteb/LiMVAM/simulation_studies/results/results_p_in_xaxis/"
+results_dir = "/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic/results/results_p_in_xaxis/"
 save_name = f"DataFrame_with_{nb_seeds}_seeds_beta_{beta1_str}_{beta2_str}_no_shared_disturbances"
 save_path = results_dir + save_name
 df.to_csv(save_path, index=False)

@@ -18,4 +18,4 @@ __pycache__
 *trash/
 
 # Data envelopes directory (which contains .npz files)
-real_data_experiments/2_data_envelopes/
+experiments_meg/2_data_envelopes/

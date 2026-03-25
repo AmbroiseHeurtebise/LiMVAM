@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 
-# I'm not sure if the following lines limit the number of jobs when using the functions
+# Not sure if the following lines limit the number of jobs when using the functions
 # apply_inverse_epochs and make_inverse_operator from mne.minimum_norm
 os.environ["OMP_NUM_THREADS"] = "4"
 os.environ["MKL_NUM_THREADS"] = "4"

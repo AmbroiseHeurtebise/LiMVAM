@@ -41,7 +41,7 @@ def find_direction(x, y):
     return score_x_to_y, score_y_to_x, r_y_on_x, r_x_on_y
 
 
-def find_parent_variable(X):
+def find_parent_variable(X, standardize=True):
     """
     Identify the root variable (with no parents) and get the residuals
     when regressing all the other variables on the root variable.
@@ -50,7 +50,10 @@ def find_parent_variable(X):
     """
     m, p, n = X.shape
     Xc = X - X.mean(axis=-1, keepdims=True)
-    Xz = Xc / Xc.std(axis=-1, keepdims=True)
+    if standardize:
+        Xz = Xc / Xc.std(axis=-1, keepdims=True)
+    else:
+        Xz = Xc
 
     scores = np.zeros((p, p))
     R = np.zeros((p, p, m, n))
@@ -71,7 +74,7 @@ def find_parent_variable(X):
     return parent_id, r_all_on_parent
 
 
-def estimate_causal_order(X):
+def estimate_causal_order(X, standardize=True):
     """
     Identify the entire ordering by estimating the root variable, 
     removing its effect on the other variables, and iterating this procedure.
@@ -84,7 +87,7 @@ def estimate_causal_order(X):
     order = []
     remaining_indices = np.arange(p)
     while len(order) < p - 1:
-        parent, X_current = find_parent_variable(X_current)
+        parent, X_current = find_parent_variable(X_current, standardize=standardize)
         order.append(remaining_indices[parent])
         remaining_indices = np.delete(remaining_indices, parent)
     order.append(remaining_indices[0])
@@ -92,7 +95,7 @@ def estimate_causal_order(X):
     return order
 
 
-def direct_limvam(X):
+def direct_limvam(X, standardize=True):
     """
     Assume the model xi = Bi xi + ei, where Bi are DAG matrices that share the 
     same causal ordering, and the disturbances ei are correlated across views.
@@ -103,6 +106,10 @@ def direct_limvam(X):
     ----------
     X: array of shape (m, p, n) for m views, p variables, n samples
     
+    standardize: bool, optional (default=True)
+        If True, observations are standardized to unit variance.
+        If False, observations are only centered to zero mean.
+    
     Returns
     -------
     B: DAG matrices (ndarray of shape (m, p, p))
@@ -110,7 +117,7 @@ def direct_limvam(X):
     P: Permutation matrix that contains the ordering (ndarray of shape (p, p))
     """
     # estimate the causal ordering using the cross-covariance-based criterion
-    order = estimate_causal_order(X)
+    order = estimate_causal_order(X, standardize=standardize)
     
     # estimate causal weights with one-step Feasible Generalized Least Squares
     X_ordered = X[:, order]

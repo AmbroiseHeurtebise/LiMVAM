@@ -67,10 +67,15 @@ def compute_ratio_for_two_variables(
     return float(l1 - l2), b_hat, b_hat_reverse
 
 
-def find_parent_variable(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
+def find_parent_variable(
+    X, steps=1000, lr=1e-2, method_for_b="LS_regression", standardize=True
+):
     m, p_current, _ = X.shape
     Xc = X - X.mean(axis=-1, keepdims=True)
-    Xz = Xc / Xc.std(axis=-1, keepdims=True)
+    if standardize:
+        Xz = Xc / Xc.std(axis=-1, keepdims=True)
+    else:
+        Xz = Xc
     
     # Initialize score matrix and coefficients
     scores = np.zeros((p_current, p_current))
@@ -99,7 +104,9 @@ def find_parent_variable(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
     return parent_id, r_all_on_parent
 
 
-def estimate_causal_order(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
+def estimate_causal_order(
+    X, steps=1000, lr=1e-2, method_for_b="LS_regression", standardize=True
+):
     p = X.shape[1]
     X_current = X.copy()
     
@@ -107,7 +114,8 @@ def estimate_causal_order(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
     remaining_indices = np.arange(p)
     while len(order) < p - 1:
         parent, X_current = find_parent_variable(
-            X_current, steps=steps, lr=lr, method_for_b=method_for_b)
+            X_current, steps=steps, lr=lr, method_for_b=method_for_b, 
+            standardize=standardize)
         order.append(remaining_indices[parent])
         remaining_indices = np.delete(remaining_indices, parent)
     order.append(remaining_indices[0])
@@ -115,7 +123,9 @@ def estimate_causal_order(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
     return order
 
 
-def pairwise_limvam(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
+def pairwise_limvam(
+    X, steps=1000, lr=1e-2, method_for_b="LS_regression", standardize=True
+):
     """
     Assume the model xi = Bi xi + ei, where Bi are DAG matrices that share the 
     same causal ordering, and the disturbances ei are correlated across views.
@@ -140,6 +150,10 @@ def pairwise_limvam(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
         The method used to estimate regression coefficients.
         It can be either 'LS_regression' or 'MLE'.
     
+    standardize: bool, optional (default=True)
+        If True, observations are standardized to unit variance.
+        If False, observations are only centered to zero mean.
+    
     Returns
     -------
     B: DAG matrices (ndarray of shape (m, p, p))
@@ -147,7 +161,8 @@ def pairwise_limvam(X, steps=1000, lr=1e-2, method_for_b="LS_regression"):
     P: Permutation matrix that contains the ordering (ndarray of shape (p, p))
     """
     # estimate the causal ordering using the likelihood-based criterion
-    order = estimate_causal_order(X, steps=steps, lr=lr, method_for_b=method_for_b)
+    order = estimate_causal_order(
+        X, steps=steps, lr=lr, method_for_b=method_for_b, standardize=standardize)
     
     # estimate causal weights with one-step Feasible Generalized Least Squares
     X_ordered = X[:, order]

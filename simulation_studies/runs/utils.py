@@ -4,23 +4,16 @@ from scipy.stats import gennorm, pearsonr, multivariate_t
 from time import time
 from picard import amari_distance
 import lingam
-from limvam.micado import micado
-from limvam.praline import praline
-from limvam.caramel import caramel
-from limvam.directlingam_extension import directlingam_extension
+from limvam.ica_limvam import ica_limvam
+from limvam.pairwise_limvam import pairwise_limvam
+from limvam.direct_limvam import direct_limvam
 import warnings
 from sklearn.exceptions import ConvergenceWarning
 
 
 # non-linear activation: f = (1 - alpha) * identity + alpha * logistic
-def f1(x):
-    return x
-
-def f2(x):
-    return 2 / (1 + np.exp(-x)) - 1
-
 def f(x, alpha):
-    return (1 - alpha) * f1(x) + alpha * f2(x)
+    return (1 - alpha) * x + alpha * (2 / (1 + np.exp(-x)) - 1)
 
 
 def rmultivariate_powerexp(rng, n, mean, Sigma, beta):
@@ -225,7 +218,7 @@ def run_experiment(
     nb_zeros_Ti=0,
     nb_gaussian_disturbances=0,
     nb_equal_variances=0,
-    ica_algo="shica_ml",
+    algo="direct_limvam",
     random_state=None,
     shared_causal_ordering=True,
     use_scale_D=False,
@@ -234,6 +227,7 @@ def run_experiment(
 ):
     if use_shared_disturbances & (density == "sub_gauss_super"):
         nb_gaussian_disturbances = p - 2 * (p // 3)
+
     # generate observations X, causal order(s) P, and causal effects B and T
     X, B, T, P, A = sample_data(
         m=m,
@@ -254,19 +248,37 @@ def run_experiment(
         use_shared_disturbances=use_shared_disturbances,
     )
 
-    # apply either our method, Multi Group DirectLiNGAM, or LiNGAM
-    if ica_algo in ["multiviewica", "shica_j", "shica_ml"]:
+    # apply one of the methods
+    if algo in ["ica_limvam_j", "ica_limvam_ml"]:
+        # apply ICA-LiMVAM to retrieve B, T, P, and W
+        if algo == "ica_limvam_j":
+            ica_algo = "shica_j"
+        else:
+            ica_algo = "shica_ml"
         start = time()
-        # apply our main function to retrieve B, T, P, and W;
-        B_estimates, T_estimates, P_estimate, _, W_estimates = micado(
+        B_estimates, T_estimates, P_estimate, _, W_estimates, _, _ = ica_limvam(
             X, shared_causal_ordering=shared_causal_ordering, ica_algo=ica_algo,
             random_state=random_state, return_full=True)
         execution_time = time() - start
         if not shared_causal_ordering:
             P_estimates = P_estimate  # shape (m, p, p)
-    elif ica_algo == "multi_group_direct_lingam":
+    elif algo == "pairwise_limvam":
+        # apply PairwiseLiMVAM to retrieve B, T, P, and W
         start = time()
+        B_estimates, T_estimates, P_estimate = pairwise_limvam(X)
+        execution_time = time() - start
+        # reconstruct what would be unmixing matrices W
+        W_estimates = np.eye(p) - B_estimates
+    elif algo == "direct_limvam":
+        # apply DirectLiMVAM to retrieve B, T, P, and W
+        start = time()
+        B_estimates, T_estimates, P_estimate = direct_limvam(X)
+        execution_time = time() - start
+        # reconstruct what would be unmixing matrices W
+        W_estimates = np.eye(p) - B_estimates
+    elif algo == "multi_group_direct_lingam":
         # apply Multi Group DirectLiNGAM to retrieve B, T, P, and W
+        start = time()
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=FutureWarning)
             model = lingam.MultiGroupDirectLiNGAM()
@@ -279,9 +291,9 @@ def run_experiment(
         T_estimates = P_estimate @ B_estimates @ P_estimate.T
         # reconstruct what would be unmixing matrices W
         W_estimates = np.eye(p) - B_estimates
-    elif ica_algo == "lingam":
-        start = time()
+    elif algo == "lingam":
         # apply LiNGAM to retrieve B, T, P, and W
+        start = time()
         B_estimates = []
         T_estimates = []
         P_estimates = []
@@ -305,30 +317,8 @@ def run_experiment(
         P_estimates = np.array(P_estimates)  # shape (m, p, p) and not (p, p)
         # reconstruct unmixing matrices W
         W_estimates = np.eye(p) - B_estimates
-    elif ica_algo == "pairwise":
-        start = time()
-        B_estimates, T_estimates, P_estimate = praline(X, steps=1000, lr=1e-2)
-        execution_time = time() - start
-        # reconstruct what would be unmixing matrices W
-        W_estimates = np.eye(p) - B_estimates
-    elif ica_algo == "direct_limvam":
-        start = time()
-        B_estimates, T_estimates, P_estimate = directlingam_extension(X)
-        execution_time = time() - start
-        # reconstruct what would be unmixing matrices W
-        W_estimates = np.eye(p) - B_estimates
-    elif ica_algo == "mv_notears":
-        start = time()
-        B_estimates, T_estimates, P_estimate, _ = caramel(
-            X, lambda_pen=1., shared_causal_ordering=shared_causal_ordering, 
-            use_callback=False)
-        execution_time = time() - start
-        if not shared_causal_ordering:
-            P_estimates = P_estimate
-        # reconstruct unmixing matrices W
-        W_estimates = np.eye(p) - B_estimates
     else:
-        raise ValueError("Wrong ica_algo.")
+        raise ValueError("The parameter 'algo' is not correct.")
     
     # errors
     def compute_error_P(P1, P2, method="exact"):
@@ -341,7 +331,7 @@ def run_experiment(
 
     if shared_causal_ordering:
         # P has shape (p, p)
-        if ica_algo == "lingam":
+        if algo == "lingam":
             # P_estimates has shape (m, p, p)
             # error_P = np.mean([1 - (Pe == P).all() for Pe in P_estimates])
             error_P_spearmanr = np.mean(
@@ -357,7 +347,7 @@ def run_experiment(
             error_P_exact = compute_error_P(P_estimate, P, method="exact")
     else:
         # P has shape (m, p, p)
-        if ica_algo == "multi_group_direct_lingam" or ica_algo == "pairwise":
+        if algo in ["pairwise_limvam", "direct_limvam", "multi_group_direct_lingam"]:
             # P_estimate has shape (p, p)
             # error_P = np.mean([1 - (P_estimate == Pi).all() for Pi in P])
             error_P_spearmanr = np.mean(
@@ -385,7 +375,7 @@ def run_experiment(
         "p": p,
         "n": n,
         "noise_level": noise_level,
-        "ica_algo": ica_algo,
+        "algo": algo,
         "nb_gaussian_disturbances": nb_gaussian_disturbances,
         "nb_equal_variances": nb_equal_variances,
         "nb_zeros_Ti": nb_zeros_Ti,

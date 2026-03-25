@@ -21,4 +21,4 @@ __pycache__
 real_data_experiments/2_data_envelopes/
 
 # Results of our algorithm on Cam-CAN
-real_data_experiments/4_results/
+# real_data_experiments/4_results/

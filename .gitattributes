@@ -1,0 +1,2 @@
+# configure Linguist to ignore ipynb files when computing language stats
+*.ipynb linguist-generated=true

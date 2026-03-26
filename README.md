@@ -1,13 +1,19 @@
+![Python](https://img.shields.io/badge/python-3.9+-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 # Linear Multi-View Acyclic Model (LiMVAM)
 
-This repository contains the algorithms introduced in [this paper](https://arxiv.org/pdf/2502.20115).
+This repository implements the algorithms introduced in [this paper](https://arxiv.org/pdf/2502.20115).
 
-There are three algorithms: DirectLiMVAM, PairwiseLiMVAM, and ICA-LiMVAM (with its two variants ICA-LiMVAM-J and ICA-LiMVAM-ML). 
-Given a dataset made of multiple views, variables, and samples, these algorithms seek for a causal ordering between variables that is shared across views. They also estimate the strength of the causal effects. 
+It provides three main methods: **DirectLiMVAM**, **PairwiseLiMVAM**, and **ICA-LiMVAM** (with its two variants **ICA-LiMVAM-J** and **ICA-LiMVAM-ML**). 
 
-The three algorithms are written in Python and can be found in ```limvam```.
+Given multi-view data (multiple datasets describing the same variables across different views), these algorithms aim to:
+- Recover a **shared causal ordering** of variables across views
+- Estimate the **strength of causal relationships**
 
-## How to install
+All implementations are written in Python and are available in ```limvam```.
+
+## Installation
 
 From within your local repository, run
 
@@ -15,16 +21,35 @@ From within your local repository, run
 pip install -e .
 ```
 
-## Getting started with examples
+## Quick example
 
-Three example notebooks are provided in the ```examples``` folder. They show how to use the three algorithms in practice on simple synthetic data.
+```python
+from limvam.direct_limvam import direct_limvam
+import numpy as np
+
+X = np.random.randn(n_views, n_variables, n_samples)
+B, T, P = direct_limvam(X)
+```
+
+In the outputs: 
+- ```B``` are square matrices contains the strength of causal relationships
+- ```T``` are strictly lower triangular matrices
+- ```P``` is a permutation matrix that contains the causal ordering
+
+## Getting started
+
+Three example notebooks are provided in the ```examples``` folder. 
+They demonstrate how to use each algorithm in practice on simple synthetic data.
 
 ## fMRI experiment
 
-Data for this experiment come from [this preprocessed dataset](https://github.com/cabal-cmu/Feedback-Discovery).
-They consist in fMRI recordings from 9 participants who performed a rhyming judgment task. Each participant's recordings contain 9 variables: one task regressor (Input I) and 8 brain regions (LOCC, ROCC, LIPL, RIPL, LACC, RACC, LIFG, RIFG). We then apply one of our algorithms to recover a causal graph between brain regions.
+This experiment uses data from a [preprocessed dataset](https://github.com/cabal-cmu/Feedback-Discovery).
 
-The experiment runs quickly and can be found in ```experiments_fmri```.
+The dataset contains fMRI recordings from 9 participants who performed a rhyming judgment task. 
+Each participant's recordings contain 9 variables: one task regressor and 8 brain regions. 
+We apply one of our methods to recover a causal graph between brain regions.
+
+The experiment runs quickly and is available in the ```experiments_fmri``` folder.
 
 ## MEG experiments
 
@@ -33,7 +58,7 @@ However, running these experiments requires downloading the [Cam-CAN dataset](ht
 
 ## Synthetic experiments
 
-There are several simulation studies in the ```experiments_synthetic``` folder. They evaluate the methods in various scenarios, such as when varying the numbers of views, variables, samples, or the noise level.
+The ```experiments_synthetic``` folder contains several simulation studies evaluating the methods under different scenarios, including: varying the numbers of views, variables, samples, or the noise level.
 
 ## Cite
 

@@ -1,6 +1,11 @@
 # Linear Multi-View Acyclic Model (LiMVAM)
 
-This repository contains the PRaLiNE and MICaDo algorithms (including the MICaDo-ML and MICaDo-J variants), which estimate causal order and causal effect matrices from multiple datasets simultaneously.
+This repository contains the algorithms introduced in [this paper](https://arxiv.org/pdf/2502.20115).
+
+There are three algorithms: DirectLiMVAM, PairwiseLiMVAM, and ICA-LiMVAM (with its two variants ICA-LiMVAM-J and ICA-LiMVAM-ML). 
+Given a dataset made of multiple views, variables, and samples, these algorithms seek for a causal ordering between variables that is shared across views. They also estimate the strength of the causal effects. 
+
+The three algorithms are written in Python and can be found in ```limvam```.
 
 ## How to install
 
@@ -10,35 +15,32 @@ From within your local repository, run
 pip install -e .
 ```
 
-## Main files
+## Getting started with examples
 
-The code for the two algorithms can be found in ```limvam/praline.py``` and ```limvam/micado.py```.
+Three example notebooks are provided in the ```examples``` folder. They show how to use the three algorithms in practice on simple synthetic data.
 
-## Example files
+## fMRI experiment
 
-Two example notebooks are provided in the ```examples``` folder.
-The first one, ```example_micado.ipynb``` shows how to use MICaDo-ML and MICaDo-J in contexts of shared or multiple causal orderings. 
-The second one, ```example_praline.ipynb``` shows how to use PRaLiNE in the shared causal ordering context.
+Data for this experiment come from [this preprocessed dataset](https://github.com/cabal-cmu/Feedback-Discovery).
+They consist in fMRI recordings from 9 participants who performed a rhyming judgment task. Each participant's recordings contain 9 variables: one task regressor (Input I) and 8 brain regions (LOCC, ROCC, LIPL, RIPL, LACC, RACC, LIFG, RIFG). We then apply one of our algorithms to recover a causal graph between brain regions.
 
-## Reproduce simulation studies
+The experiment runs quickly and can be found in ```experiments_fmri```.
 
-The code to reproduce the simulation studies is located in the ```simulation_studies``` folder. 
+## MEG experiments
 
-Specifically:
-- The file to run figure 1 is in ```simulation_studies/runs/run_timepoints_in_xaxis.py```
-- The file to run figure 2 is in ```simulation_studies/runs/run_execution_time.py```
-- The file to run figure 4 is in ```simulation_studies/runs/run_p_in_xaxis.py```
-- The file to run figure 5 is in ```simulation_studies/runs/run_noise_in_xaxis.py```
-- The file to run figure 6 is in ```simulation_studies/runs/run_noise_diversity.py```
-- The file to run figure 7 is in ```simulation_studies/runs/run_sparsity_of_Ti.py```
+The code to reproduce the MEG experiments is located in the ```experiments_meg``` folder.
+However, running these experiments requires downloading the [Cam-CAN dataset](https://www.sciencedirect.com/science/article/pii/S1053811915008150) and adapting some paths.
 
-The results of the simulations are stored in ```simulation_studies/results```.
+## Synthetic experiments
 
-The plotting files are in ```simulation_studies/plotting```, and the obtained figures are in ```simulation_studies/figures```.
+There are several simulation studies in the ```experiments_synthetic``` folder. They evaluate the methods in various scenarios, such as when varying the numbers of views, variables, samples, or the noise level.
 
-## Reproduce Cam-CAN experiments
+## Cite
 
-The code to reproduce the Cam-CAN experiments shown in figures 3, 8, 9, and 10 is located in the ```real_data_experiments``` folder.
-However, running these experiments requires downloading the Cam-CAN dataset and adapting some paths.
+If you use this code in your project, please cite [this paper](https://arxiv.org/pdf/2502.20115):
 
-The folder ```real_data_experiments/1_preprocessing``` is used to preprocess the Cam-CAN data, and stores the obtained envelopes of oscillatory signals in ```real_data_experiments/2_data_envelopes```. These envelopes are then used in ```real_data_experiments/3_runs```, and the results of the runs are stored in ```real_data_experiments/4_results```. Finally, these results are used in ```real_data_experiments/5_plotting``` to produce the desired figures.
+```bash
+Ambroise Heurtebise, Omar Chehab, Pierre Ablin, Alexandre Gramfort, Aapo Hyvärinen
+Multi-View Causal Discovery without Non-Gaussianity: Identifiability and Algorithms
+arXiv preprint, 2025
+```

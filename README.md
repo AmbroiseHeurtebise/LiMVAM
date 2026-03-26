@@ -24,7 +24,7 @@ pip install -e .
 ## Quick example
 
 ```python
-from limvam.direct_limvam import direct_limvam
+from limvam import direct_limvam
 import numpy as np
 
 X = np.random.randn(n_views, n_variables, n_samples)
@@ -32,7 +32,7 @@ B, T, P = direct_limvam(X)
 ```
 
 In the outputs: 
-- ```B``` are square matrices contains the strength of causal relationships
+- ```B``` are square matrices that contain the strength of causal relationships
 - ```T``` are strictly lower triangular matrices
 - ```P``` is a permutation matrix that contains the causal ordering
 

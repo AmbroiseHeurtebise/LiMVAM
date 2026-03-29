@@ -71,7 +71,8 @@ def sample_data(
     shared_causal_ordering=True,
     use_scale_D=False,
     non_linearity_alpha=None,
-    use_shared_disturbances=True,
+    use_shared_disturbances=False,
+    cross_view_correlations_alpha=1,
 ):
     rng = np.random.RandomState(random_state)
     
@@ -130,7 +131,11 @@ def sample_data(
         M = rng.randn(p, m, m)
         Sigmas = np.zeros((p, m, m))
         for j in range(p):
-            Sigmas[j] = M[j] @ M[j].T + m * np.eye(m)
+            # Sigmas[j] = M[j] @ M[j].T + m * np.eye(m)
+            S = M[j] @ M[j].T
+            D = np.diag(1 / np.sqrt(np.diag(S)))
+            Sigmas[j] = cross_view_correlations_alpha * D @ S @ D
+            np.fill_diagonal(Sigmas[j], 1)
 
         # disturbances
         E = np.zeros((m, p, n))
@@ -223,7 +228,8 @@ def run_experiment(
     shared_causal_ordering=True,
     use_scale_D=False,
     non_linearity_alpha=None,
-    use_shared_disturbances=True,
+    use_shared_disturbances=False,
+    cross_view_correlations_alpha=1,
 ):
     if use_shared_disturbances & (density == "sub_gauss_super"):
         nb_gaussian_disturbances = p - 2 * (p // 3)
@@ -246,6 +252,7 @@ def run_experiment(
         use_scale_D=use_scale_D,
         non_linearity_alpha=non_linearity_alpha,
         use_shared_disturbances=use_shared_disturbances,
+        cross_view_correlations_alpha=cross_view_correlations_alpha,
     )
 
     # apply one of the methods
@@ -382,6 +389,7 @@ def run_experiment(
         "shared_causal_ordering": shared_causal_ordering,
         "non_linearity_alpha": non_linearity_alpha,
         "use_shared_disturbances": use_shared_disturbances,
+        "cross_view_correlations_alpha": cross_view_correlations_alpha,
         "random_state": random_state,
         "error_B": error_B,
         "error_B_abs": error_B_abs,

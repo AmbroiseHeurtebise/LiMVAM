@@ -262,7 +262,7 @@ m = 10
 p = 5
 n = 1000
 disturbances = "gaussian"
-nb_seeds = 2
+nb_seeds = 100
 random_state_list = np.arange(nb_seeds)
 
 # run experiment multiple times

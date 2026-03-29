@@ -73,6 +73,7 @@ def sample_data(
     non_linearity_alpha=None,
     use_shared_disturbances=False,
     cross_view_correlations_alpha=1,
+    n_views_different_orderings=0,
 ):
     rng = np.random.RandomState(random_state)
     
@@ -187,13 +188,19 @@ def sample_data(
         T[i][lower_tri_indices[0][zero_indices], lower_tri_indices[1][zero_indices]] = 0
 
     # causal order
-    if shared_causal_ordering:
+    if shared_causal_ordering and n_views_different_orderings == 0:
         P = np.eye(p)[rng.permutation(p)]
+    elif shared_causal_ordering and n_views_different_orderings > 0:
+        P = np.array([np.eye(p)[rng.permutation(p)] for _ in range(m)])
+        n_views_same_ordering = m - n_views_different_orderings
+        for i in range(1, n_views_same_ordering):
+            P[i] = P[0]
+        P = P[rng.permutation(m)]
     else:
         P = np.array([np.eye(p)[rng.permutation(p)] for _ in range(m)])
 
     # causal effect matrices B
-    if shared_causal_ordering:
+    if shared_causal_ordering and n_views_different_orderings == 0:
         B = P.T @ T @ P
     else:
         B = np.array([Pi.T @ Ti @ Pi for Pi, Ti in zip(P, T)])
@@ -230,6 +237,7 @@ def run_experiment(
     non_linearity_alpha=None,
     use_shared_disturbances=False,
     cross_view_correlations_alpha=1,
+    n_views_different_orderings=0,
 ):
     if use_shared_disturbances & (density == "sub_gauss_super"):
         nb_gaussian_disturbances = p - 2 * (p // 3)
@@ -253,6 +261,7 @@ def run_experiment(
         non_linearity_alpha=non_linearity_alpha,
         use_shared_disturbances=use_shared_disturbances,
         cross_view_correlations_alpha=cross_view_correlations_alpha,
+        n_views_different_orderings=n_views_different_orderings,
     )
 
     # apply one of the methods
@@ -263,8 +272,9 @@ def run_experiment(
         else:
             ica_algo = "shica_ml"
         start = time()
+        only_one_ordering = shared_causal_ordering and n_views_different_orderings == 0
         B_estimates, T_estimates, P_estimate, _, W_estimates, _, _ = ica_limvam(
-            X, shared_causal_ordering=shared_causal_ordering, ica_algo=ica_algo,
+            X, shared_causal_ordering=only_one_ordering, ica_algo=ica_algo,
             random_state=random_state, return_full=True)
         execution_time = time() - start
         if not shared_causal_ordering:
@@ -336,7 +346,7 @@ def run_experiment(
             corr = pearsonr(np.argmax(P1, axis=1), np.argmax(P2, axis=1))[0]
             return corr
 
-    if shared_causal_ordering:
+    if shared_causal_ordering and n_views_different_orderings == 0:
         # P has shape (p, p)
         if algo == "lingam":
             # P_estimates has shape (m, p, p)
@@ -390,6 +400,7 @@ def run_experiment(
         "non_linearity_alpha": non_linearity_alpha,
         "use_shared_disturbances": use_shared_disturbances,
         "cross_view_correlations_alpha": cross_view_correlations_alpha,
+        "n_views_different_orderings": n_views_different_orderings,
         "random_state": random_state,
         "error_B": error_B,
         "error_B_abs": error_B_abs,

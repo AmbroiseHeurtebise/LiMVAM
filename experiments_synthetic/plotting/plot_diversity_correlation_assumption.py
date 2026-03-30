@@ -114,6 +114,14 @@ ax1.set_xticks(positions)
 ax1.set_xticklabels([g[0] for g in groups], fontsize=fontsize)
 ax1.set_xlim(0.5, 3.5)
 
+# caption
+caption = (
+    r"Caption: Data are generated with $m=10$ views and $p=5$ disturbances," + "\n"
+    "and the experiment is ran with 100 different seeds."
+)
+fig.text(0.5, -0.07, caption, ha='center', va='center', fontsize=fontsize)
+
+
 plt.tight_layout()
 
 # save figure

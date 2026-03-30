@@ -195,6 +195,7 @@ def sample_data(
         n_views_same_ordering = m - n_views_different_orderings
         for i in range(1, n_views_same_ordering):
             P[i] = P[0]
+        P_main = P[0]
         P = P[rng.permutation(m)]
     else:
         P = np.array([np.eye(p)[rng.permutation(p)] for _ in range(m)])
@@ -204,6 +205,8 @@ def sample_data(
         B = P.T @ T @ P
     else:
         B = np.array([Pi.T @ Ti @ Pi for Pi, Ti in zip(P, T)])
+        if n_views_different_orderings > 0:
+            P = P_main
 
     # mixing matrices
     A = np.linalg.inv(np.eye(p) - B)
@@ -346,7 +349,8 @@ def run_experiment(
             corr = pearsonr(np.argmax(P1, axis=1), np.argmax(P2, axis=1))[0]
             return corr
 
-    if shared_causal_ordering and n_views_different_orderings == 0:
+    # if shared_causal_ordering and n_views_different_orderings == 0:
+    if shared_causal_ordering:
         # P has shape (p, p)
         if algo == "lingam":
             # P_estimates has shape (m, p, p)

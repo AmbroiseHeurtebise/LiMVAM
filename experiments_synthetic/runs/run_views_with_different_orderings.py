@@ -50,7 +50,7 @@ print(f"The experiment took {execution_time:.2f} s.")
 
 # save dataframe
 results_dir = "/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic/results/results_views_with_different_orderings/"
-save_name = f"DataFrame_with_{nb_seeds}_seeds"
+save_name = f"DataFrame_with_{nb_seeds}_seeds_new_error"
 save_path = results_dir + save_name
 df.to_csv(save_path, index=False)
 print("\n####################################### End #######################################")

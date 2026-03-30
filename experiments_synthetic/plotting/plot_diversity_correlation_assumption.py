@@ -129,4 +129,7 @@ figures_dir = simulation_dir + "figures/"
 plt.savefig(
     figures_dir + f"simulation_diversity_correlation_assumption.pdf", 
     bbox_inches="tight")
+plt.savefig(
+    figures_dir + f"simulation_diversity_correlation_assumption.png", 
+    bbox_inches="tight", dpi=300)
 # plt.show()

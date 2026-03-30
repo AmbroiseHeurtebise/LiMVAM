@@ -45,8 +45,8 @@ ax.set_ylabel(r"Error on $B^i$")
 # caption
 caption = (
     "Caption: Cross-view correlation level is 0 when views are\n"
-    "uncorrelated, and 1 when cross-view correlations are drawn\n"
-    "from a product of standard Gaussians."
+    "uncorrelated, and 1 for random cross-view correlations as\n"
+    "in Section 6 of the paper."
 )
 fig.text(0.5, -0.2, caption, ha='center', va='center', fontsize=fontsize)
 
@@ -54,3 +54,4 @@ fig.text(0.5, -0.2, caption, ha='center', va='center', fontsize=fontsize)
 # save figure
 figures_dir = Path("/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic/figures")
 plt.savefig(figures_dir / f"simulation_cross_view_correlations_decrease.pdf", bbox_inches="tight")
+plt.savefig(figures_dir / f"simulation_cross_view_correlations_decrease.png", bbox_inches="tight", dpi=300)

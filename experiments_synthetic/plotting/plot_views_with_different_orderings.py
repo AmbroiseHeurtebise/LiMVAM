@@ -34,7 +34,11 @@ sns.lineplot(
 )
 
 # ax.set_yscale("log")
-ax.grid(linewidth=0.5, alpha=0.5)
+eps = 0.01
+ax.set_ylim(-eps, 0.3 + eps)
+ax.set_yticks([0, 0.3])
+ax.set_yticks(np.arange(0, 0.4, 0.1), minor=True)
+ax.grid(which="both", linewidth=0.5, alpha=0.5)
 ax.set_xlabel("Number of views with a different causal ordering")
 ax.set_ylabel(r"Error on $B^i$")
 

@@ -39,12 +39,12 @@ ax.set_xlabel("Number of views with a different causal ordering")
 ax.set_ylabel(r"Error on $B^i$")
 
 # caption
-# caption = (
-#     "Cross-view correlation level is 0 when views are uncorrelated,\n"
-#     "and 1 when cross-view correlations are drawn from a product\n"
-#     "of standard Gaussians."
-# )
-# fig.text(0.5, -0.2, caption, ha='center', va='center', fontsize=fontsize)
+caption = (
+    "Caption: Performance of DirectLiMVAM when a subset of\n"
+    "views has a different causal ordering. Data are generated\n"
+    r"with $m=20$ views in total."
+)
+fig.text(0.5, -0.2, caption, ha='center', va='center', fontsize=fontsize)
 
 
 # save figure

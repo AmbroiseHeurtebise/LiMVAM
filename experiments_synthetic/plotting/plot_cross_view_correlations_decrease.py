@@ -34,15 +34,19 @@ sns.lineplot(
 )
 
 # ax.set_yscale("log")
-ax.grid(linewidth=0.5, alpha=0.5)
+ax.set_xticks([0, 1])
+ax.set_yticks([0, 0.5])
+ax.set_xticks(np.arange(0, 1.1, 0.1), minor=True)
+ax.set_yticks(np.arange(0, 0.6, 0.1), minor=True)
+ax.grid(which="both", linewidth=0.5, alpha=0.5)
 ax.set_xlabel("Level of cross-view correlations")
 ax.set_ylabel(r"Error on $B^i$")
 
 # caption
 caption = (
-    "Cross-view correlation level is 0 when views are uncorrelated,\n"
-    "and 1 when cross-view correlations are drawn from a product\n"
-    "of standard Gaussians."
+    "Caption: Cross-view correlation level is 0 when views are\n"
+    "uncorrelated, and 1 when cross-view correlations are drawn\n"
+    "from a product of standard Gaussians."
 )
 fig.text(0.5, -0.2, caption, ha='center', va='center', fontsize=fontsize)
 

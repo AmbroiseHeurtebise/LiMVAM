@@ -4,12 +4,13 @@ import matplotlib.pyplot as plt
 
 
 # matplotlib style
-fontsize = 15
+fontsize = 20
 rc = {
     "font.size": fontsize,
     "xtick.labelsize": fontsize,
     "ytick.labelsize": fontsize,
     "font.family": "serif",
+    "font.serif": ["Times"],
 }
 plt.rcParams.update(rc)
 
@@ -17,7 +18,8 @@ plt.rcParams.update(rc)
 nb_seeds = 100
 
 # read dataframe
-simulation_dir = "/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic/"
+# simulation_dir = "/storage/store4/work/aheurteb/LiMVAM/experiments_synthetic/"
+simulation_dir = "/Users/ambroiseheurtebise/Desktop/LiMVAM/experiments_synthetic/"
 results_dir = simulation_dir + "results/results_diversity_correlation_assumption/"
 save_name = f"DataFrame_with_{nb_seeds}_seeds"
 save_path = results_dir + save_name
@@ -33,10 +35,11 @@ groups = [
     ("No correlation and\ndiversity across\nvariables", (True,  False)),
 ]
 
-COLOR_SCORE = "#1f77b4"
+# COLOR_SCORE = "#1f77b4"
+COLOR_SCORE = "#17becf"
 COLOR_ERROR = "#ff7f0e"
 
-fig, ax1 = plt.subplots(figsize=(9, 5))
+fig, ax1 = plt.subplots(figsize=(10, 4))
 ax2 = ax1.twinx()
 
 positions = np.array([1, 2, 3])
@@ -115,11 +118,11 @@ ax1.set_xticklabels([g[0] for g in groups], fontsize=fontsize)
 ax1.set_xlim(0.5, 3.5)
 
 # caption
-caption = (
-    r"Caption: Data are generated with $m=10$ views and $p=5$ disturbances," + "\n"
-    "and the experiment is ran with 100 different seeds."
-)
-fig.text(0.5, -0.07, caption, ha='center', va='center', fontsize=fontsize)
+# caption = (
+#     r"Caption: Data are generated with $m=10$ views and $p=5$ disturbances," + "\n"
+#     "and the experiment is ran with 100 different seeds."
+# )
+# fig.text(0.5, -0.07, caption, ha='center', va='center', fontsize=fontsize)
 
 
 plt.tight_layout()
